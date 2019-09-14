@@ -22,17 +22,19 @@ def store_feature_vectors(collection):
 		print(file)
 		img = cv2.imread(READ_PATH + file)
 		gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+		lbp_results = lbp.lbp(gray)
+		sift_results = sift.sift(gray)
 
 		feature_vector = {
 			"name": file.replace(".jpg", ""),
-			"lbp": lbp.lbp(gray).tolist(),
-			"sift": sift.sift(gray).tolist()
+			"lbp": lbp_results.tolist(),
+			"sift": sift_results.tolist()
 		}
 		with open(WRITE_PATH+file.replace(".jpg", "")+"_fd.json", "w") as fp:
 			json.dump(feature_vector, fp, indent=4, sort_keys=True)
 
-		feature_vector["lbp"] = Binary(pickle.dumps(lbp.lbp(gray), protocol=2))
-		feature_vector["sift"] = Binary(pickle.dumps(sift.sift(gray), protocol=2))
+		feature_vector["lbp"] = Binary(pickle.dumps(lbp_results, protocol=2))
+		feature_vector["sift"] = Binary(pickle.dumps(sift_results, protocol=2))
 
 		collection.insert_one(feature_vector)
 

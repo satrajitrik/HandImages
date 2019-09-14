@@ -13,11 +13,10 @@ def k_similar_features(feature_vector, query_results, model, k):
 	distances = []
 
 	for item in query_results:
+		item_vector = pickle.loads(item[model.lower()])
 		if model == "LBP":
-			item_vector = pickle.loads(item[model.lower()])
 			distances.append([item["name"], distance.euclidean(feature_vector, item_vector)])
 		else:
-			item_vector = pickle.loads(item[model.lower()])
 			matches = []
 			for vec in feature_vector:
 			    min_dist = distance.euclidean(vec, item_vector[0])
