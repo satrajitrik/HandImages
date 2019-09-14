@@ -1,0 +1,6 @@
+{
+	"DATABASE_NAME": "mwdb",
+	"COLLECTION_NAME": "hands",
+	"READ_PATH": "/Users/satrajitmaitra/Downloads/Hands_smaller/",
+	"WRITE_PATH": "/Users/satrajitmaitra/Downloads/Hands_features/"
+}

@@ -1,13 +1,11 @@
 import pickle
 import traceback
 
-from bson.binary import Binary
+import constants
+
 from pymongo import MongoClient
 from scipy.spatial import distance
 
-
-DATABASE_NAME = "mwdb"
-COLLECTION_NAME = "hands"
 
 def k_similar_features(feature_vector, query_results, model, k):
 	distances = []
@@ -32,11 +30,15 @@ def k_similar_features(feature_vector, query_results, model, k):
 def main():
 	image_id, model, k = input("Enter image ID, model name (LBP or SIFT) and k: ").split()
 
-	try:
-		conn = MongoClient('mongodb://localhost:27017/')
+	constants_dict = constants.read_json()
+	db_name = constants_dict["DATABASE_NAME"]
+	collection_name = constants_dict["COLLECTION_NAME"]
 
-		database = conn[DATABASE_NAME]
-		collection = database[COLLECTION_NAME]
+	try:
+		conn = MongoClient("mongodb://localhost:27017/")
+
+		database = conn[db_name]
+		collection = database[collection_name]
 
 		feature_vector = None
 		image_dict = collection.find_one({"name": image_id})
@@ -52,7 +54,7 @@ def main():
 		conn.close()
 
 	except Exception as detail:
-	    traceback.print_exc()
+		traceback.print_exc()
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 	main()
