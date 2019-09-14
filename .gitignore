@@ -1,3 +1,3 @@
 .DS_Store
 .ipynb_checkpoints/
-./__pycache__/
+/phase1/__pycache__/
