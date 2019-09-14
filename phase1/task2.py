@@ -25,8 +25,8 @@ def store_feature_vectors(collection):
 
 		feature_vector = {
 			"name": file.replace(".jpg", ""),
-			"lbp": lbp.lbp(gray),
-			"sift": sift.sift(gray)
+			"lbp": lbp.lbp(gray).tolist(),
+			"sift": sift.sift(gray).tolist()
 		}
 		with open(WRITE_PATH+file.replace(".jpg", "")+"_fd.json", "w") as fp:
 			json.dump(feature_vector, fp, indent=4, sort_keys=True)
