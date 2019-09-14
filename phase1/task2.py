@@ -1,10 +1,12 @@
 import cv2
 import json
 import os
+import pickle
 import traceback
 import sift
 import lbp
 
+from bson.binary import Binary
 from pymongo import MongoClient
 
 
@@ -23,11 +25,14 @@ def store_feature_vectors(collection):
 
 		feature_vector = {
 			"name": file.replace(".jpg", ""),
-			"lbp": lbp.lbp(gray).tolist(),
-			"sift": sift.sift(gray).tolist()
+			"lbp": lbp.lbp(gray),
+			"sift": sift.sift(gray)
 		}
 		with open(WRITE_PATH+file.replace(".jpg", "")+"_fd.json", "w") as fp:
 			json.dump(feature_vector, fp, indent=4, sort_keys=True)
+
+		feature_vector["lbp"] = Binary(pickle.dumps(lbp.lbp(gray), protocol=2))
+		feature_vector["sift"] = Binary(pickle.dumps(sift.sift(gray), protocol=2))
 
 		collection.insert_one(feature_vector)
 
