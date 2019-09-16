@@ -3,7 +3,7 @@ from skimage.feature import local_binary_pattern
 
 
 def lbp(gray):
-	radius = 50
+	radius = 1
 	n_points = 8 * radius
 
 	blocks = np.array([gray[x:x+100,y:y+100] for x in range(0,gray.shape[0],100) for y in range(0,gray.shape[1],100)])

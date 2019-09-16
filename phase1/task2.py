@@ -16,7 +16,7 @@ def store_feature_vectors(collection, read_path, write_path):
 	files = os.listdir(read_path)
 
 	for file in files:
-		print(file)
+		print("Reading file: {}".format(file))
 		img = cv2.imread(read_path + file)
 		gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 		lbp_results = lbp.lbp(gray)
@@ -27,7 +27,7 @@ def store_feature_vectors(collection, read_path, write_path):
 			"lbp": lbp_results.tolist(),
 			"sift": sift_results.tolist()
 		}
-		with open(write_path+file.replace(".jpg", "")+"_fd.json", "w") as fp:
+		with open("{}{}_fd.json".format(write_path, file.replace(".jpg", "")), "w") as fp:
 			json.dump(feature_vector, fp, indent=4, sort_keys=True)
 
 		feature_vector["lbp"] = Binary(pickle.dumps(lbp_results))
@@ -35,16 +35,16 @@ def store_feature_vectors(collection, read_path, write_path):
 
 		collection.insert_one(feature_vector)
 
-def main():
+def starter():
 	constants_dict = constants.read_json()
 	db_name = constants_dict["DATABASE_NAME"]
 	collection_name = constants_dict["COLLECTION_NAME"]
+	mongo_url = constants_dict["MONGO_URL"]
 	read_path = constants_dict["READ_PATH"]
 	write_path = constants_dict["WRITE_PATH"]
 
 	try:
-		connection = MongoClient("mongodb://localhost:27017/")
-
+		connection = MongoClient(mongo_url)
 
 		database = connection[db_name]
 		collection = database[collection_name]
@@ -56,5 +56,4 @@ def main():
 	except Exception as detail:
 		traceback.print_exc()
 
-if __name__ == "__main__":
-	main()
+	print("Done... ")
