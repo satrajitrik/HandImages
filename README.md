@@ -13,3 +13,5 @@ Requirements for the project:
 2. `open-cv`
 3. `pymongo`
 4. `mongodb`
+
+To be continued .......
