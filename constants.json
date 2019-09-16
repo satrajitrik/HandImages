@@ -1,6 +1,7 @@
 {
-	"DATABASE_NAME": "mwdb",
+	"DATABASE_NAME": "mwdb1",
 	"COLLECTION_NAME": "hands",
+	"MONGO_URL": "mongodb://localhost:27017/",
 	"READ_PATH": "/Users/satrajitmaitra/Downloads/Hands_smaller/",
 	"WRITE_PATH": "/Users/satrajitmaitra/Downloads/Hands_features/"
 }

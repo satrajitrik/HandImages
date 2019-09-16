@@ -1,3 +1,4 @@
+import math
 import pickle
 import traceback
 
@@ -6,6 +7,9 @@ import constants
 from pymongo import MongoClient
 from scipy.spatial import distance
 
+
+def euclidean(vector1, vector2):
+	return math.sqrt(sum([math.pow(vector1[i] - vector2[i], 2) for i in range(len(vector1))]))
 
 def k_similar_features(feature_vector, query_results, model, k):
 	distances = []
@@ -17,25 +21,22 @@ def k_similar_features(feature_vector, query_results, model, k):
 		else:
 			matches = []
 			for vec in feature_vector:
-			    min_dist = distance.euclidean(vec, item_vector[0])
-			    for i in range(1, len(item_vector)):
-			        dist = distance.euclidean(vec, item_vector[i])
-			        if min_dist > dist:
-			            min_dist = dist
-			    matches.append(min_dist)
-			distances.append([item["name"], sum(matches)])
+				min_dist = min([distance.euclidean(vec, item_vec) for item_vec in item_vector])
+				matches.append(min_dist)
+			distances.append([item["name"], sum(matches) / len(matches)])
 
 	return sorted(distances, key=lambda x: x[1])[:k]
 
-def main():
+def starter():
 	image_id, model, k = input("Enter image ID, model name (LBP or SIFT) and k: ").split()
 
 	constants_dict = constants.read_json()
 	db_name = constants_dict["DATABASE_NAME"]
 	collection_name = constants_dict["COLLECTION_NAME"]
+	mongo_url = constants_dict["MONGO_URL"]
 
 	try:
-		conn = MongoClient("mongodb://localhost:27017/")
+		conn = MongoClient(mongo_url)
 
 		database = conn[db_name]
 		collection = database[collection_name]
@@ -56,5 +57,4 @@ def main():
 	except Exception as detail:
 		traceback.print_exc()
 
-if __name__ == "__main__":
-	main()
+	print("Done... ")
