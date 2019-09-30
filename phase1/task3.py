@@ -8,9 +8,6 @@ from pymongo import MongoClient
 from scipy.spatial import distance
 
 
-def euclidean(vector1, vector2):
-	return math.sqrt(sum([math.pow(vector1[i] - vector2[i], 2) for i in range(len(vector1))]))
-
 def k_similar_features(feature_vector, query_results, model, k):
 	distances = []
 
