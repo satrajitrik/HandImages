@@ -25,7 +25,7 @@ def main():
         feature_model = input("Select the Feature Model:\n1. CM\t2. LBP\t3. HOG\t4. SIFT : ")
         dimension_reduction = input("Select the Dimension Reduction Technique:\n1. PCA\t2. SVD\t3. NMF\t4. LDA : ")
         k = input("Enter k: ")
-        image_id = raw_input("Enter image ID: ")
+        image_id = input("Enter image ID: ")
     elif task == 3:
         feature_model = input("Select the Feature Model:\n1. CM\t2. LBP\t3. HOG\t4. SIFT : ")
         dimension_reduction = input("Select the Dimension Reduction Technique:\n1. PCA\t2. SVD\t3. NMF\t4. LDA : ")
@@ -42,9 +42,9 @@ def main():
     elif task == 8:
         pass
     else:
-        print "Enter Task number (1-8)"
+        print("Enter Task number (1-8)")
     
-    image_id = raw_input("Enter image ID: ")
+    image_id = input("Enter image ID: ")
     label = input("Select the label: 1. 2. 3. 4 ....")
     feature_model = input("Select the Feature Model:\n1. CM\t2. LBP\t3. HOG\t4. SIFT : ")
     dimension_reduction = input("Select the Dimension Reduction Technique:\n1. PCA\t2. SVD\t3. NMF\t4. LDA : ")
