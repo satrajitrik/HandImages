@@ -24,7 +24,7 @@ class Descriptor(object):
     	else:
     		return self.sift()
 
-   	"""
+	"""
    		SIFT feature vector
    	"""
     def sift(self):
@@ -33,8 +33,8 @@ class Descriptor(object):
         grey_scale_image = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
         keypoints, descriptor = sift.detectAndCompute(grey_scale_image, None)
         return descriptor
-    
-    """
+
+	"""
    		LBP feature vector
    	"""
     def lbp(self):
@@ -54,8 +54,8 @@ class Descriptor(object):
             lbp_feature_vector = np.concatenate([lbp_feature_vector, lbp_histograms[i]])
         
         return lbp_feature_vector
-    
-    """
+
+	"""
    		HOG feature vector
    	"""
     def hog(self):
@@ -65,8 +65,8 @@ class Descriptor(object):
                                                        cells_per_block=(2, 2), block_norm='L2-Hys',
                                                        visualize=True, feature_vector=True, multichannel=True)
         return hog_feature_vector
-    
-    """
+
+	"""
    		# TODO: Color Moments feature vector
    	"""
     def color_moments(self):
