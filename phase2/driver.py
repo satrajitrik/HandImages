@@ -1,18 +1,11 @@
-import json
 import os
 
 import cv2
 
+from Config import Config
 from descriptor import Descriptor
 
 JSON_FILE_PATH = "/Users/satrajitmaitra/HandImages/constants.json"
-
-
-def read_json():
-    with open(JSON_FILE_PATH) as f:
-        constants = json.load(f)
-    
-    return constants
 
 
 def main():
@@ -50,8 +43,7 @@ def main():
     dimension_reduction = input("Select the Dimension Reduction Technique:\n1. PCA\t2. SVD\t3. NMF\t4. LDA : ")
     k = input("Enter k: ")
     
-    constants_dict = read_json()
-    read_path = constants_dict["READ_PATH"]
+    read_path = Config.read_path()
     
     files = os.listdir(read_path)
     image_file = files[files.index("{}.jpg".format(image_id))]

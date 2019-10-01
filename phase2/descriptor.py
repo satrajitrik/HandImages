@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
-
+import skimage.feature as sk_feature
+import skimage.transform as sk_transform
 from skimage.feature import local_binary_pattern
 
 
@@ -12,9 +13,8 @@ class Descriptor(object):
         orb = cv2.ORB_create()
         sift = cv2.xfeatures2d.SIFT_create()
         grey_scale_image = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
-        kp, des = sift.detectAndCompute(grey_scale_image, None)
-        
-        return des
+        keypoints, descriptor = sift.detectAndCompute(grey_scale_image, None)
+        return descriptor
     
     def lbp(self):
         radius = 1
@@ -34,8 +34,13 @@ class Descriptor(object):
         
         return concat_histograms
     
-    def hog():
-        pass
+    def hog(self):
+        scaled_image = sk_transform.rescale(self.image, 0.1,
+                                            anti_aliasing=True)  # Anti-aliasing applies gaussian filter
+        hog_feature_vector, hog_image = sk_feature.hog(scaled_image, orientations=9, pixels_per_cell=(8, 8),
+                                                       cells_per_block=(2, 2), block_norm='L2-Hys',
+                                                       visualize=True, feature_vector=True, multichannel=True)
+        return hog_feature_vector
     
-    def color_moments():
+    def color_moments(self):
         pass
