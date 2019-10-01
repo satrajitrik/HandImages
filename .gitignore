@@ -1,5 +1,10 @@
 .DS_Store
 .ipynb_checkpoints/
+*.pyc
+
+constants.json
+
 /phase1/__pycache__/
 /phase2/__pycache__/
 /results
+.idea/
