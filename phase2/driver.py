@@ -2,18 +2,22 @@ import os
 
 import cv2
 
-from Config import Config
+import Task1, Task2, Task3, Task4, Task5, Task6, Task7, Task8
+from config import Config
 from descriptor import Descriptor
 
 JSON_FILE_PATH = "/Users/satrajitmaitra/HandImages/constants.json"
 
 
 def main():
-    task = input("Input Task number:")
+    task = int(input("Input Task number:"))
+    
     if task == 1:
-        feature_model = input("Select the Feature Model:\n1. CM\t2. LBP\t3. HOG\t4. SIFT : ")
-        dimension_reduction = input("Select the Dimension Reduction Technique:\n1. PCA\t2. SVD\t3. NMF\t4. LDA : ")
-        k = input("Enter k: ")
+        feature_model = int(input("Select the Feature Model:\n1. CM\t2. LBP\t3. HOG\t4. SIFT : "))
+        dimension_reduction = int(input("Select the Dimension Reduction Technique:\n1. PCA\t2. SVD\t3. NMF\t4. LDA : "))
+        k = int(input("Enter k: "))
+        Task1.starter(feature_model, dimension_reduction, k)
+
     elif task == 2:
         feature_model = input("Select the Feature Model:\n1. CM\t2. LBP\t3. HOG\t4. SIFT : ")
         dimension_reduction = input("Select the Dimension Reduction Technique:\n1. PCA\t2. SVD\t3. NMF\t4. LDA : ")
@@ -36,23 +40,6 @@ def main():
         pass
     else:
         print("Enter Task number (1-8)")
-    
-    image_id = input("Enter image ID: ")
-    label = input("Select the label: 1. 2. 3. 4 ....")
-    feature_model = input("Select the Feature Model:\n1. CM\t2. LBP\t3. HOG\t4. SIFT : ")
-    dimension_reduction = input("Select the Dimension Reduction Technique:\n1. PCA\t2. SVD\t3. NMF\t4. LDA : ")
-    k = input("Enter k: ")
-    
-    read_path = Config.read_path()
-    
-    files = os.listdir(read_path)
-    image_file = files[files.index("{}.jpg".format(image_id))]
-    
-    img = cv2.imread(read_path + image_file)
-    desc = Descriptor(img)
-    
-    print(desc.sift())
-    print(desc.lbp())
 
 
 if __name__ == '__main__':

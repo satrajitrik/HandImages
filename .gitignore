@@ -4,6 +4,7 @@
 
 constants.json
 
+/notebooks
 /phase1/__pycache__/
 /phase2/__pycache__/
 /results

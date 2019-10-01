@@ -6,9 +6,27 @@ from skimage.feature import local_binary_pattern
 
 
 class Descriptor(object):
-    def __init__(self, image):
+    def __init__(self, image, feature_model):
         self.image = image
-    
+        self.feature_descriptor = self._feature_descriptor(feature_model)
+
+    """
+    	Based on feature model, call respective class methods.
+    	Returns feature descriptors
+    """
+    def _feature_descriptor(self, feature_model):
+    	if feature_model == 1:
+    		return self.color_moments()
+    	elif feature_model == 2:
+    		return self.lbp()
+    	elif feature_model == 3:
+    		return self.hog()
+    	else:
+    		return self.sift()
+
+   	"""
+   		SIFT feature vector
+   	"""
     def sift(self):
         orb = cv2.ORB_create()
         sift = cv2.xfeatures2d.SIFT_create()
@@ -16,6 +34,9 @@ class Descriptor(object):
         keypoints, descriptor = sift.detectAndCompute(grey_scale_image, None)
         return descriptor
     
+    """
+   		LBP feature vector
+   	"""
     def lbp(self):
         radius = 1
         n_points = 8 * radius
@@ -27,13 +48,16 @@ class Descriptor(object):
         lbps = np.array([local_binary_pattern(block, n_points, radius, 'default').reshape(10000, ) for block in blocks])
         lbp_histograms = np.array([np.histogram(lbp, bins=np.arange(257), density=True)[0] for lbp in lbps])
         
-        concat_histograms = lbp_histograms[0]
+        lbp_feature_vector = lbp_histograms[0]
         
         for i in range(1, len(lbp_histograms)):
-            concat_histograms = np.concatenate([concat_histograms, lbp_histograms[i]])
+            lbp_feature_vector = np.concatenate([lbp_feature_vector, lbp_histograms[i]])
         
-        return concat_histograms
+        return lbp_feature_vector
     
+    """
+   		HOG feature vector
+   	"""
     def hog(self):
         scaled_image = sk_transform.rescale(self.image, 0.1,
                                             anti_aliasing=True)  # Anti-aliasing applies gaussian filter
@@ -42,5 +66,8 @@ class Descriptor(object):
                                                        visualize=True, feature_vector=True, multichannel=True)
         return hog_feature_vector
     
+    """
+   		# TODO: Color Moments feature vector
+   	"""
     def color_moments(self):
-        pass
+        return None
