@@ -24,8 +24,8 @@ class Descriptor(object):
     	else:
     		return self.sift()
 
-	"""
-   		SIFT feature vector
+    """
+		SIFT feature vector
    	"""
     def sift(self):
         orb = cv2.ORB_create()
@@ -34,7 +34,7 @@ class Descriptor(object):
         keypoints, descriptor = sift.detectAndCompute(grey_scale_image, None)
         return descriptor
 
-	"""
+    """
    		LBP feature vector
    	"""
     def lbp(self):
@@ -55,7 +55,7 @@ class Descriptor(object):
         
         return lbp_feature_vector
 
-	"""
+    """
    		HOG feature vector
    	"""
     def hog(self):
@@ -66,7 +66,7 @@ class Descriptor(object):
                                                        visualize=True, feature_vector=True, multichannel=True)
         return hog_feature_vector
 
-	"""
+    """
    		# TODO: Color Moments feature vector
    	"""
     def color_moments(self):
