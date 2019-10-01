@@ -25,8 +25,8 @@ class Descriptor(object):
     		return self.sift()
 
     """
-		SIFT feature vector
-   	"""
+    	SIFT feature vector
+    """
     def sift(self):
         orb = cv2.ORB_create()
         sift = cv2.xfeatures2d.SIFT_create()
@@ -35,8 +35,8 @@ class Descriptor(object):
         return descriptor
 
     """
-   		LBP feature vector
-   	"""
+    	LBP feature vector
+    """
     def lbp(self):
         radius = 1
         n_points = 8 * radius
@@ -56,8 +56,8 @@ class Descriptor(object):
         return lbp_feature_vector
 
     """
-   		HOG feature vector
-   	"""
+    	HOG feature vector
+    """
     def hog(self):
         scaled_image = sk_transform.rescale(self.image, 0.1,
                                             anti_aliasing=True)  # Anti-aliasing applies gaussian filter
@@ -67,7 +67,7 @@ class Descriptor(object):
         return hog_feature_vector
 
     """
-   		# TODO: Color Moments feature vector
-   	"""
+    	# TODO: Color moments feature vector
+    """
     def color_moments(self):
         return None
