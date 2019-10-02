@@ -24,29 +24,29 @@ class LatentSymantics(object):
             return self.lda()
 
     """
-		# TODO PCA
-	"""
+    	# TODO PCA
+    """
 
     def pca(self):
         return None
 
     """
-		# TODO SVD
-	"""
+    	# TODO SVD
+    """
 
     def svd(self):
         return None
 
     """
-		# TODO NMF
-	"""
+    	# TODO NMF
+    """
 
     def nmf(self):
         return None
 
     """
-		LDA Dimensionality Reduction
-	"""
+    	LDA Dimensionality Reduction
+    """
 
     def lda(self):
         lda = LatentDirichletAllocation(n_components=self.k)
