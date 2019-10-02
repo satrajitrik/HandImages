@@ -9,9 +9,9 @@ class LatentSymantics(object):
         self.latent_symantics = self._latent_symantics(choice)
 
     """
-		Based on choice, call respective class methods.
-		Returns Features with reduced dimensions.
-	"""
+    	Based on choice, call respective class methods.
+    	Returns Features with reduced dimensions.
+    """
 
     def _latent_symantics(self, choice):
         if choice == 1:
