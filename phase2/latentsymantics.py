@@ -2,6 +2,21 @@ import numpy as np
 from sklearn.decomposition import LatentDirichletAllocation
 
 
+class LatentSymanticsType(object):
+    def __init__(self, choice):
+        self.symantics_type = self._symantics_type(choice)
+
+    def _symantics_type(self, choice):
+        if choice == 1:
+            return "pca"
+        elif choice == 2:
+            return "svd"
+        elif choice == 3:
+            return "nmf"
+        else:
+            return "lda"
+
+
 class LatentSymantics(object):
     def __init__(self, x, k, choice):
         self.x = x

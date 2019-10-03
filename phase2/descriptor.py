@@ -5,6 +5,21 @@ import skimage.transform as sk_transform
 from skimage.feature import local_binary_pattern
 
 
+class DescriptorType(object):
+    def __init__(self, feature_model):
+        self.descriptor_type = self._descriptor_type(feature_model)
+
+    def _descriptor_type(self, feature_model):
+        if feature_model == 1:
+            return "cm"
+        elif feature_model == 2:
+            return "lbp"
+        elif feature_model == 3:
+            return "hog"
+        else:
+            return "sift"
+
+
 class Descriptor(object):
     def __init__(self, image, feature_model):
         self.image = image
