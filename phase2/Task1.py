@@ -4,6 +4,7 @@ import os
 import traceback
 
 from config import Config
+from database import Database
 from descriptor import Descriptor, DescriptorType
 from latentsymantics import LatentSymantics, LatentSymanticsType
 from pymongo import MongoClient
@@ -24,16 +25,13 @@ def process_files(path, feature_model):
     return x, ids
 
 
-def starter(feature_model, dimension_reduction, k):
-    config_object = Config()
-    path = config_object.read_path()
-    mongo_url = config_object.mongo_url()
-    database_name = config_object.database_name()
-    collection_name = config_object.collection_name()
+def get_latentsymantics_and_insert(feature_model, dimension_reduction, k):
+    path = Config().read_path()
 
     x, ids = process_files(path, feature_model)
     descriptor_type = DescriptorType(feature_model).descriptor_type
     symantics_type = LatentSymanticsType(dimension_reduction).symantics_type
+
     latent_symantics = LatentSymantics(
         np.array(x), k, dimension_reduction
     ).latent_symantics
@@ -49,16 +47,10 @@ def starter(feature_model, dimension_reduction, k):
         for i in range(len(ids))
     ]
 
-    try:
-        connection = MongoClient(mongo_url)
-        database = connection[database_name]
-        collection = database[collection_name]
+    Database().insert_many(records)
+    return latent_symantics
 
-        collection.insert_many(records)
-        print("Successfully inserted into DB... ")
 
-    except Exception as e:
-        traceback.print_exc()
-        print("Connection refused... ")
-
+def starter(feature_model, dimension_reduction, k):
+    print(get_latentsymantics_and_insert(feature_model, dimension_reduction, k))
     print("Done... ")
