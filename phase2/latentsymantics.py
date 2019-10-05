@@ -50,7 +50,10 @@ class LatentSymantics(object):
     """
 
     def svd(self):
-        return None
+        svd = TruncatedSVD(n_components=self.k)
+        svd.fit(self.x)
+        result = svd.transform(self.x)
+        return result
 
     """
     	# TODO NMF
