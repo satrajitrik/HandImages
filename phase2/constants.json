@@ -1,0 +1,8 @@
+{
+	"DATABASE_NAME": "mwdb",
+	"COLLECTION_NAME": "hands",
+	"MONGO_URL": "mongodb://localhost:27017/",
+	"READ_PATH": "/Users/satrajitmaitra/Downloads/testset1/",
+	"WRITE_PATH": "/Users/satrajitmaitra/Downloads/Hands_features/",
+    "METADATA_FILE": "/media/adv/Shared/PROJECTS/CSE515_MWDB/HandInfo.csv"
+}

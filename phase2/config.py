@@ -3,10 +3,11 @@ import json
 
 class Config(object):
     def __init__(self):
-        self.__json_file_path = "/Users/satrajitmaitra/HandImages/constants.json"
+        self.__json_file_path = "/Users/satrajitmaitra/HandImages/phase2/constants.json"
+        self.__metadata_collection_name = "metadata"
         with open(self.__json_file_path) as f:
             self.constants = json.load(f)
-
+    
     def database_name(self):
         return self.constants.get("DATABASE_NAME")
 
@@ -21,3 +22,9 @@ class Config(object):
 
     def write_path(self):
         return self.constants.get("WRITE_PATH")
+
+    def metadata_collection_name(self):
+        return self.__metadata_collection_name
+
+    def metadata_file(self):
+        return self.constants.get("METADATA_FILE")
