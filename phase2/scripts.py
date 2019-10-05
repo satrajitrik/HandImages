@@ -18,7 +18,7 @@ def load_metadata_to_db():
         left_hand = 1 if "left" in row['aspectOfHand'] else 0
         accessories = row['accessories']
         
-        collection.insert_one(
+        output = collection.insert_one(
             {
                 'image_id': image_name,
                 'male': male,
@@ -27,6 +27,10 @@ def load_metadata_to_db():
                 'accessories': accessories
             }
         )
+        if not output.acknowledged:
+            print("ERROR: Could not save ", row)
+            exit(1)
+    print("Inserted ", len(metadata), "rows")
 
 
 if __name__ == '__main__':
