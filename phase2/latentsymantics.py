@@ -1,5 +1,8 @@
 import numpy as np
 from sklearn.decomposition import LatentDirichletAllocation
+from sklearn.decomposition import NMF
+from sklearn.decomposition import PCA
+from sklearn.decomposition import TruncatedSVD
 
 
 class LatentSymanticsType(object):
@@ -43,21 +46,24 @@ class LatentSymantics(object):
     """
 
     def pca(self):
-        return None
+        pca = PCA(n_components=self.k)
+        return pca.fit_transform(self.x)
 
     """
     	# TODO SVD
     """
 
     def svd(self):
-        return None
+        svd = TruncatedSVD(n_components=self.k)
+        return svd.fit_transform(self.x)
 
     """
     	# TODO NMF
     """
 
     def nmf(self):
-        return None
+        nmf = NMF(n_components=self.k)
+        return nmf.fit_transform(self.x)
 
     """
     	LDA Dimensionality Reduction
