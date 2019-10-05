@@ -2,7 +2,7 @@
 .ipynb_checkpoints/
 *.pyc
 
-constants.json
+*.json
 
 /notebooks
 /phase1/__pycache__/

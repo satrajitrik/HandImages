@@ -1,3 +1,5 @@
+import traceback
+
 from config import Config
 from pymongo import MongoClient
 
