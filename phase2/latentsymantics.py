@@ -42,15 +42,16 @@ class LatentSymantics(object):
             return self.lda()
 
     """
-    	# TODO PCA
+    	PCA Dimensionality Reduction
     """
 
     def pca(self):
-        pca = PCA(n_components=self.k)
-        return pca.fit_transform(self.x)
+        if 0 < self.k < min(self.x.shape[0], self.x.shape[1]):
+            return PCA(n_components=self.k).fit_transform(self.x)
+        return PCA(n_components=min(self.x.shape[0], self.x.shape[1])).fit_transform(self.x)
 
     """
-    	# TODO SVD
+    	SVD Dimensionality Reduction
     """
 
     def svd(self):
@@ -58,7 +59,7 @@ class LatentSymantics(object):
         return svd.fit_transform(self.x)
 
     """
-    	# TODO NMF
+    	NMF Dimensionality Reduction
     """
 
     def nmf(self):

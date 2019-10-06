@@ -65,3 +65,12 @@ class Database(object):
         connection.close()
 
         return query_results
+
+    def retrieve_with_labels(self, label, value):
+        connection = self.open_connection()
+        database = connection[self.database_name]
+        collection = database[Config().metadata_collection_name()]
+
+        query_results = collection.find({label: value})
+
+        return [item["image_id"] for item in query_results]
