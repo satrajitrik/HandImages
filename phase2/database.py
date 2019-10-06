@@ -29,39 +29,84 @@ class Database(object):
 
         print("Successfully inserted into DB... ")
 
-    def retrieve_many(self, descriptor_type, symantics_type, k):
+    def retrieve_many(self, descriptor_type, symantics_type, k, label=None, value=-1):
         connection = self.open_connection()
         database = connection[self.database_name]
         collection = database[self.collection_name]
 
-        query_results = collection.find(
-            {
-                "$and": [
-                    {"descriptor_type": descriptor_type},
-                    {"symantics_type": symantics_type},
-                    {"k": k},
-                ]
-            }
-        )
+        if label:
+            query_results = collection.find(
+                {
+                    "$and": [
+                        {"descriptor_type": descriptor_type},
+                        {"symantics_type": symantics_type},
+                        {"k": k},
+                        {label: value},
+                    ]
+                }
+            )
+        else:
+            query_results = collection.find(
+                {
+                    "$and": [
+                        {"descriptor_type": descriptor_type},
+                        {"symantics_type": symantics_type},
+                        {"k": k},
+                        {"male": -1},
+                        {"dorsal": -1},
+                        {"left_hand": -1},
+                        {"accessories": -1},
+                    ]
+                }
+            )
         connection.close()
 
         return [item for item in query_results]
 
-    def retrieve_one(self, image_id, descriptor_type, symantics_type, k):
+    def retrieve_one(
+        self, image_id, descriptor_type, symantics_type, k, label=None, value=-1
+    ):
         connection = self.open_connection()
         database = connection[self.database_name]
         collection = database[self.collection_name]
 
-        query_results = collection.find_one(
-            {
-                "$and": [
-                    {"image_id": image_id},
-                    {"descriptor_type": descriptor_type},
-                    {"symantics_type": symantics_type},
-                    {"k": k},
-                ]
-            }
-        )
+        if label:
+            query_results = collection.find_one(
+                {
+                    "$and": [
+                        {"image_id": image_id},
+                        {"descriptor_type": descriptor_type},
+                        {"symantics_type": symantics_type},
+                        {"k": k},
+                        {label: value},
+                    ]
+                }
+            )
+        else:
+            query_results = collection.find_one(
+                {
+                    "$and": [
+                        {"image_id": image_id},
+                        {"descriptor_type": descriptor_type},
+                        {"symantics_type": symantics_type},
+                        {"k": k},
+                        {"male": -1},
+                        {"dorsal": -1},
+                        {"left_hand": -1},
+                        {"accessories": -1},
+                    ]
+                }
+            )
         connection.close()
 
         return query_results
+
+    def retrieve_metadata_with_labels(self, label, value):
+        connection = self.open_connection()
+        database = connection[self.database_name]
+        collection = database[Config().metadata_collection_name()]
+
+        query_results = collection.find({label: value})
+        connection.close()
+
+        return [item["image_id"] for item in query_results]

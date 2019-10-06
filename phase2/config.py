@@ -7,7 +7,7 @@ class Config(object):
         self.__metadata_collection_name = "metadata"
         with open(self.__json_file_path) as f:
             self.constants = json.load(f)
-    
+
     def database_name(self):
         return self.constants.get("DATABASE_NAME")
 
