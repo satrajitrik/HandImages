@@ -14,10 +14,9 @@ def starter(feature_model, dimension_reduction, k, label_choice):
     descriptor_type = DescriptorType(feature_model).descriptor_type
     symantics_type = LatentSymanticsType(dimension_reduction).symantics_type
 
-    filtered_image_ids = Database().retrieve_with_labels(label, value)
+    filtered_image_ids = Database().retrieve_metadata_with_labels(label, value)
 
     x, ids = functions.process_files(path, feature_model, filtered_image_ids)
-    print(x)
     latent_symantics = LatentSymantics(
         np.array(x), k, dimension_reduction
     ).latent_symantics

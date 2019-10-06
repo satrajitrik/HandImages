@@ -56,7 +56,24 @@ def main():
         Task3.starter(feature_model, dimension_reduction, k, label)
 
     elif task == 4:
-        pass
+        feature_model = int(
+            input("Select the Feature Model:\n1. CM\t2. LBP\t3. HOG\t4. SIFT : ")
+        )
+        dimension_reduction = int(
+            input(
+                "Select the Dimension Reduction Technique:\n1. PCA\t2. SVD\t3. NMF\t4. LDA : "
+            )
+        )
+        k = int(input("Enter k: "))
+        label = int(
+            input(
+                "Select the label:\n1. Left\t2. Right\t3. Dorsal\t4. Palmar\n5. With accessories\t6. Without accessories\t7. Male\t8. Female: "
+            )
+        )
+        image_id = input("Enter image ID: ")
+        m = int(input("Enter m: "))
+        Task4.starter(feature_model, dimension_reduction, k, label, image_id, m)
+
     elif task == 5:
         pass
     elif task == 6:

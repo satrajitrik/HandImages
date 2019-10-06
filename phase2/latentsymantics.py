@@ -48,7 +48,9 @@ class LatentSymantics(object):
     def pca(self):
         if 0 < self.k < min(self.x.shape[0], self.x.shape[1]):
             return PCA(n_components=self.k).fit_transform(self.x)
-        return PCA(n_components=min(self.x.shape[0], self.x.shape[1])).fit_transform(self.x)
+        return PCA(n_components=min(self.x.shape[0], self.x.shape[1])).fit_transform(
+            self.x
+        )
 
     """
     	SVD Dimensionality Reduction

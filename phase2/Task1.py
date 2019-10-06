@@ -18,7 +18,9 @@ def get_latentsymantics_and_insert(feature_model, dimension_reduction, k):
         np.array(x), k, dimension_reduction
     ).latent_symantics
 
-    records = functions.set_records(ids, descriptor_type, symantics_type, k, latent_symantics)
+    records = functions.set_records(
+        ids, descriptor_type, symantics_type, k, latent_symantics
+    )
 
     Database().insert_many(records)
     return latent_symantics
