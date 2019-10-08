@@ -20,6 +20,11 @@ class DescriptorType(object):
         else:
             return "sift"
 
+    def check_sift(self):
+        if self.descriptor_type == "sift":
+            return True
+        return False
+
 
 class Descriptor(object):
     def __init__(self, image, feature_model):
