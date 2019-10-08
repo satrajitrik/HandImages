@@ -1,5 +1,5 @@
 """
-	Utility functions
+    Utility functions
 """
 import numpy as np
 import os
@@ -28,10 +28,10 @@ def process_files(path, feature_model, filtered_image_ids=None):
 
     if DescriptorType(feature_model).check_sift():
         """
-    	For SIFT, we flatten the image descriptor array into an array of keypoints.
-    	We return an extra list (pos) representing the number of keypoints for each image. 
-    	This is done to extract the feature descriptors (after dimensionality reduction) of 
-    	each image correctly while inserting into the DB.
+    	    For SIFT, we flatten the image descriptor array into an array of keypoints.
+    	    We return an extra list (pos) representing the number of keypoints for each image. 
+    	    This is done to extract the feature descriptors (after dimensionality reduction) of 
+    	    each image correctly while inserting into the DB.
     	"""
         sift_x, pos = x[0], [x[0].shape[0]]
         for i in range(1, len(x)):
@@ -40,7 +40,7 @@ def process_files(path, feature_model, filtered_image_ids=None):
         return sift_x, ids, pos
 
     """
-    For all other feature descriptors, return only the ids and descriptor array.
+        For all other feature descriptors, return only the ids and descriptor array.
     """
     return np.array(x), ids
 
@@ -62,15 +62,15 @@ def set_records(ids, descriptor_type, symantics_type, k, latent_symantics, pos):
         }
         if f == 1:
             """
-			For SIFT.
-			"""
+                For SIFT.
+            """
             start, end = prev_start, prev_start + pos[i]
             record["latent_symantics"] = latent_symantics[start:end].tolist()
             prev_start = end
         else:
             """
-			For all other feature descriptors.
-			"""
+                For all other feature descriptors.
+            """
             record["latent_symantics"] = latent_symantics[i].tolist()
         records.append(record)
 
@@ -78,7 +78,7 @@ def set_records(ids, descriptor_type, symantics_type, k, latent_symantics, pos):
 
 
 """
-	Similarity method for SIFT. To be updated. Gives okayish results.
+    Similarity method for SIFT. To be updated. Gives okayish results.
 """
 
 
