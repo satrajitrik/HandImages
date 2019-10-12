@@ -105,8 +105,11 @@ class Database(object):
         connection = self.open_connection()
         database = connection[self.database_name]
         collection = database[Config().metadata_collection_name()]
-
-        query_results = collection.find({label: value})
+        
+        if label and value:
+            query_results = collection.find({label: value})
+        else:
+            query_results = collection.find()
         connection.close()
 
         return [item["image_id"] for item in query_results]
