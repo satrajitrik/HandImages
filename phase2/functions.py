@@ -16,7 +16,6 @@ def process_files(path, feature_model, filtered_image_ids=None):
 
     ids, x = [], []
     for file in files:
-        # print("Reading file: {}".format(file))
         if not filtered_image_ids or (
             filtered_image_ids and file.replace(".jpg", "") in filtered_image_ids
         ):
