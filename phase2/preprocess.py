@@ -3,7 +3,6 @@ import numpy as np
 import pandas
 
 from config import Config
-from latentsymantics import LatentSymantics
 from pymongo import MongoClient
 
 
@@ -82,26 +81,6 @@ def insert_subjects_metadata_to_db(database, metadata):
             Config().read_all_path(), 1, palmar
         )
         print("For subject {}: Completed reading palmar images... ".format(subject_id))
-
-        """
-            1: PCA,
-            2: SVD,
-            3: NMF,
-            4: LDA
-            in LatentSymantics(_, k, 1/2/3/4)
-        """
-        dorsal_latent_symantics = LatentSymantics(
-            np.transpose(dorsal_image_vectors), 1, 1
-        ).latent_symantics
-        palmar_latent_symantics = LatentSymantics(
-            np.transpose(palmar_image_vectors), 1, 1
-        ).latent_symantics
-
-        print(
-            "Dorsal image vector shape: {}, Palmar image vector shape: {}".format(
-                dorsal_latent_symantics.shape, palmar_latent_symantics.shape
-            )
-        )
 
         output = collection.insert_one(
             {
