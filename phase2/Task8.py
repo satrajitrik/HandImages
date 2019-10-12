@@ -32,5 +32,5 @@ def starter(k):
         image_metadata_matrix[index][6] = row['male']
         image_metadata_matrix[index][7] = 1 - row['male']
     
-    image_metadata_nmf_semantics = LatentSymantics(image_metadata_matrix, k, choice=3)     # Choice 3 is NMF
+    image_metadata_nmf_semantics = LatentSymantics(image_metadata_matrix, k, choice=3).latent_symantics     # Choice 3 is NMF
     
