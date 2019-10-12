@@ -113,3 +113,14 @@ class Database(object):
         connection.close()
 
         return [item["image_id"] for item in query_results]
+
+    def retrieve_subjects(self, subject_id):
+        connection = self.open_connection()
+        database = connection[self.database_name]
+        collection = database[Config().subjects_metadata_collection_name()]
+
+        source_subject_info = collection.find_one({"subject_id": subject_id})
+        other_subjects_info = collection.find({"subject_id": {"$ne": subject_id}})
+        connection.close()
+
+        return source_subject_info, other_subjects_info
