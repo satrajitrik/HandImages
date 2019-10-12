@@ -16,10 +16,11 @@ def process_files(path, feature_model, filtered_image_ids=None):
 
     ids, x = [], []
     for file in files:
-        print("Reading file: {}".format(file))
+        # print("Reading file: {}".format(file))
         if not filtered_image_ids or (
             filtered_image_ids and file.replace(".jpg", "") in filtered_image_ids
         ):
+            print("Reading file: {}".format(file))
             image = cv2.imread("{}{}".format(path, file))
 
             feature_descriptor = Descriptor(image, feature_model).feature_descriptor

@@ -3,7 +3,6 @@ import os
 import cv2
 
 import Task1, Task2, Task3, Task4, Task5, Task6, Task7, Task8
-from config import Config
 from descriptor import Descriptor
 
 JSON_FILE_PATH = "/Users/satrajitmaitra/HandImages/constants.json"
@@ -77,7 +76,9 @@ def main():
     elif task == 5:
         pass
     elif task == 6:
-        pass
+        subject_id = int(input("Enter subject ID: "))
+        Task6.starter(subject_id)
+
     elif task == 7:
         pass
     elif task == 8:

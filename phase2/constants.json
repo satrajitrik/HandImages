@@ -2,6 +2,7 @@
 	"DATABASE_NAME": "mwdb_phase2",
 	"COLLECTION_NAME": "hands",
 	"MONGO_URL": "mongodb://localhost:27017/",
+	"READ_ALL_PATH": "/Users/satrajitmaitra/Downloads/Hands/",
 	"READ_PATH": "/Users/satrajitmaitra/Downloads/testset1/",
 	"WRITE_PATH": "/Users/satrajitmaitra/Downloads/Hands_features/",
     "METADATA_FILE": "/Users/satrajitmaitra/Downloads/HandInfo.csv"
