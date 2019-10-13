@@ -2,7 +2,7 @@ import numpy
 
 from database import Database
 from latentsymantics import LatentSymantics
-
+import functions
 
 def starter(k):
     # Get all the metadata from DB
@@ -33,4 +33,6 @@ def starter(k):
         image_metadata_matrix[index][7] = 1 - row['male']
     
     image_metadata_nmf_semantics = LatentSymantics(image_metadata_matrix, k, choice=3).latent_symantics     # Choice 3 is NMF
+
+    print()
     
