@@ -30,7 +30,7 @@ def findLabels(label):
 def findsimilarity(source_latent_semantics, destination_latent_semantics):
     squares = 0
     for i in range(len(destination_latent_semantics)):
-        squares = squares + (source_latent_semantics[i] - destination_latent_semantics[i]) ** 2
+        squares = squares + (source_latent_semantics[0] - destination_latent_semantics[i]) ** 2
     return squares ** 0.5
 
 
@@ -46,30 +46,31 @@ def findlabel(feature_model, dimension_reduction, k, label, collection, config_o
 
         img_path = config_object.read_path() + image_id
         image = cv2.imread(img_path)
-        feature_vector1.append(Descriptor(image, feature_model).feature_descriptor)
+        feature_descriptor = Descriptor(image, feature_model).feature_descriptor
+        feature_vector1.append(feature_descriptor);
         source_latent_semantics = LatentSymantics(np.array(feature_vector1), k, dimension_reduction).latent_symantics
 
         for y in collection.find(
                 {"descriptor_type": descriptor_type, "symantics_type": semantics_type, "label": label_given},
-                {"latent_symantics": 1, "image_id": 1}):
-            destination_latent_semantics = y.get("latent_symantics")
+                {"latent_symantic": 1, "imageid": 1}):
+            destination_latent_semantics = y.get("latent_symantic")
             # print(destination_latent_semantics)
             similarity_vector_id = findsimilarity(source_latent_semantics, destination_latent_semantics)
-            similarity_vector_given[y.get("image_id")] = similarity_vector_id
+            similarity_vector_given[y.get("imageid")] = similarity_vector_id
 
         given_similarity_vector = sorted(similarity_vector_given.items(), key=lambda x: x[1])[:1]
 
         for y in collection.find(
                 {"descriptor_type": descriptor_type, "symantics_type": semantics_type, "label": label_vs},
-                {"latent_symantics": 1, "image_id": 1}):
-            destination_latent_semantics = y.get("latent_symantics")
+                {"latent_symantic": 1, "imageid": 1}):
+            destination_latent_semantics = y.get("latent_symantic")
             # print(destination_latent_semantics)
             similarity_vector_id = findsimilarity(source_latent_semantics, destination_latent_semantics)
-            similarity_vector_vs[y.get("image_id")] = similarity_vector_id
+            similarity_vector_vs[y.get("imageid")] = similarity_vector_id
 
         vs_similarity_vector = sorted(similarity_vector_given.items(), key=lambda x: x[1])[:1]
 
-        if given_similarity_vector < vs_similarity_vector:
+        if given_similarity_vector[0] < vs_similarity_vector[0]:
             print label_given
         else:
             print label_vs
@@ -100,7 +101,6 @@ def helper(feature_model, dimension_reduction, k, label, collection, config_obje
             img_path = config_object.read_path() + image_id
             image = cv2.imread(img_path)
             ids2.append(image_id.replace(".jpg", ""));
-
             feature_descriptor = Descriptor(image, feature_model).feature_descriptor
             feature_vector2.append(feature_descriptor);
 
@@ -157,12 +157,9 @@ def starter(feature_model, dimension_reduction, k, label, imageID):
         records1, records2 = helper(feature_model, dimension_reduction, k, label, collection, config_object)
         meta_collection.insert_many(records1)
         meta_collection.insert_many(records2)
-        findlabel(feature_model, dimension_reduction, k, label, collection, config_object, imageID)
+        findlabel(feature_model, dimension_reduction, k, label, meta_collection, config_object, imageID)
 
     except Exception as e:
         traceback.print_exc()
         print("Connection refused... ")
 
-
-if __name__ == '__main__':
-    starter(1, 1, 10, 4, 'Hand_0002079.jpg')
