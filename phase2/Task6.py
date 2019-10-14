@@ -1,10 +1,14 @@
+from timeit import default_timer as timer
+
 import numpy as np
+import json
+from gridfs import GridFS
+from pymongo import MongoClient
+from scipy.spatial import distance
 
 from config import Config
 from database import Database
 from latentsymantics import LatentSymantics
-from scipy.spatial import distance
-
 
 """
     Idea is to extract all dorsal and palmar feature descriptors for a given subject.
@@ -36,59 +40,78 @@ from scipy.spatial import distance
 """
 
 
-def compare(source_subject, other_subjects, k=1, choice=1):
+def compare(source_subject, other_subjects, k=1, choice=3):
+    connection = MongoClient(Config().mongo_url())
+    database = connection[Config().database_name()]
+    collection = database[Config().subjects_metadata_collection_name()]
+
+    grid_fs = GridFS(database=database, collection=Config().subjects_metadata_collection_name())
+    
+    with grid_fs.get(source_subject["dorsal"]) as dorsal_file:
+        source_dorsal_image_vectors = json.loads(dorsal_file.read().decode('utf-8'))
+    with grid_fs.get(source_subject["palmar"]) as palmar_file:
+        source_palmar_image_vectors = json.loads(palmar_file.read().decode('utf-8'))
+    
     source_dorsal_latent_symantics = LatentSymantics(
-        np.transpose(source_subject["dorsal"]), k, choice
+        np.transpose(source_dorsal_image_vectors), k, choice
     ).latent_symantics
     source_palmar_latent_symantics = LatentSymantics(
-        np.transpose(source_subject["palmar"]), k, choice
+        np.transpose(source_palmar_image_vectors), k, choice
     ).latent_symantics
-
+    
     source_dorsal_latent_symantics = [
         x for item in source_dorsal_latent_symantics.tolist() for x in item
-    ]
+        ]
     source_palmar_latent_symantics = [
         x for item in source_palmar_latent_symantics.tolist() for x in item
-    ]
+        ]
     source_latent_symantics = np.concatenate(
         (
             np.array(source_dorsal_latent_symantics),
             np.array(source_palmar_latent_symantics),
         )
     )
-
+    
     distances = []
     for subject in other_subjects:
         if subject["gender"] == source_subject["gender"]:
+            with grid_fs.get(subject["dorsal"]) as dorsal_file:
+                target_dorsal_image_vectors = json.loads(dorsal_file.read().decode('utf-8'))
+            with grid_fs.get(subject["palmar"]) as palmar_file:
+                target_palmar_image_vectors = json.loads(palmar_file.read().decode('utf-8'))
+                
             other_dorsal_latent_symantics = LatentSymantics(
-                np.transpose(subject["dorsal"]), k, choice
+                np.transpose(target_dorsal_image_vectors), k, choice
             ).latent_symantics
             other_palmar_latent_symantics = LatentSymantics(
-                np.transpose(subject["palmar"]), k, choice
+                np.transpose(target_palmar_image_vectors), k, choice
             ).latent_symantics
-
+            
             other_dorsal_latent_symantics = [
                 x for item in other_dorsal_latent_symantics.tolist() for x in item
-            ]
+                ]
             other_palmar_latent_symantics = [
                 x for item in other_palmar_latent_symantics.tolist() for x in item
-            ]
+                ]
             other_latent_symantics = np.concatenate(
                 (
                     np.array(other_dorsal_latent_symantics),
                     np.array(other_palmar_latent_symantics),
                 )
             )
-
+            
             dist = distance.cosine(source_latent_symantics, other_latent_symantics)
-
+            
             distances.append([subject["subject_id"], dist])
-
+    
     distances = sorted(distances, key=lambda x: x[1])
     return distances[:3]
 
 
 def starter(subject_id):
+    start_time = timer()
     source_subject, other_subjects = Database().retrieve_subjects(subject_id)
 
     print(compare(source_subject, other_subjects))
+    end_time = timer()
+    print("Time taken for execution (sec): ", round(end_time - start_time, 2))

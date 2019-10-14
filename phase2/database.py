@@ -115,6 +115,11 @@ class Database(object):
         return [item["image_id"] for item in query_results]
 
     def retrieve_subjects(self, subject_id):
+        """
+        
+        :param subject_id:
+        :return:
+        """
         connection = self.open_connection()
         database = connection[self.database_name]
         collection = database[Config().subjects_metadata_collection_name()]
