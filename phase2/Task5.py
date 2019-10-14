@@ -30,14 +30,14 @@ def findLabels(label):
 def findsimilarity(source_latent_semantics, destination_latent_semantics):
     squares = 0
     for i in range(len(destination_latent_semantics)):
-        squares = squares + (source_latent_semantics[0] - destination_latent_semantics[i]) ** 2
+        squares = squares + (source_latent_semantics[i] - destination_latent_semantics[i]) ** 2
     return squares ** 0.5
 
 
 def findlabel(feature_model, dimension_reduction, k, label, collection, config_object, image_id):
     config_object = Config()
     try:
-        feature_vector1 = []
+        feature_descriptor = []
         similarity_vector_given = {}
         similarity_vector_vs = {}
         descriptor_type = DescriptorType(feature_model).descriptor_type
@@ -46,15 +46,14 @@ def findlabel(feature_model, dimension_reduction, k, label, collection, config_o
 
         img_path = config_object.read_path() + image_id
         image = cv2.imread(img_path)
-        feature_descriptor = Descriptor(image, feature_model).feature_descriptor
-        feature_vector1.append(feature_descriptor);
-        source_latent_semantics = LatentSymantics(np.array(feature_vector1), k, dimension_reduction).latent_symantics
-
+        feature_descriptor.append(Descriptor(image, feature_model).feature_descriptor)
+        source_latent_semantics = (collection.find_one(
+            {"descriptor_type": descriptor_type, "symantics_type": semantics_type, "label": "unknown"},
+                {"latent_symantic": 1})).get("latent_symantic")
         for y in collection.find(
                 {"descriptor_type": descriptor_type, "symantics_type": semantics_type, "label": label_given},
                 {"latent_symantic": 1, "imageid": 1}):
             destination_latent_semantics = y.get("latent_symantic")
-            # print(destination_latent_semantics)
             similarity_vector_id = findsimilarity(source_latent_semantics, destination_latent_semantics)
             similarity_vector_given[y.get("imageid")] = similarity_vector_id
 
@@ -80,7 +79,7 @@ def findlabel(feature_model, dimension_reduction, k, label, collection, config_o
         print("Error finding m related images")
 
 
-def helper(feature_model, dimension_reduction, k, label, collection, config_object):
+def helper(feature_model, dimension_reduction, k, label, collection, config_object, imageID):
     write_to = config_object.write_path()
     descriptor_type = DescriptorType(feature_model).descriptor_type
     semantics_type = LatentSymanticsType(dimension_reduction).symantics_type
@@ -96,41 +95,47 @@ def helper(feature_model, dimension_reduction, k, label, collection, config_obje
             feature_descriptor = Descriptor(image, feature_model).feature_descriptor
             feature_vector1.append(feature_descriptor);
 
+        feature_vector1.append(Descriptor(cv2.imread(config_object.read_path() + imageID), feature_model).feature_descriptor)
+
         for subject in collection.find({"aspectOfHand": {"$regex": label_vs}}, {"imageName": 1}):
             image_id = subject['imageName']
             img_path = config_object.read_path() + image_id
             image = cv2.imread(img_path)
             ids2.append(image_id.replace(".jpg", ""));
             feature_descriptor = Descriptor(image, feature_model).feature_descriptor
-            feature_vector2.append(feature_descriptor);
+            feature_vector1.append(feature_descriptor);
 
-        latent_symantics1 = LatentSymantics(np.array(feature_vector1), k, dimension_reduction).latent_symantics
+        latent_symantics = LatentSymantics(np.array(feature_vector1), k, dimension_reduction).latent_symantics
 
-        records1 = [
+        records = [
             {"imageid": ids1[i],
              "descriptor_type": descriptor_type,
              "symantics_type": semantics_type,
              "k": k,
              "label": label_given,
-             "latent_symantic": latent_symantics1[i].tolist()
+             "latent_symantic": latent_symantics[i].tolist()
              }
-            for i in range(len(ids1))
+            for i in range(len(ids1)-1)
         ]
-
-        latent_symantics2 = LatentSymantics(np.array(feature_vector2), k, dimension_reduction).latent_symantics
-
-        records2 = [
-            {"imageid": ids2[i],
+        records.append(
+            {"imageid": imageID.replace(".jpg", ""),
              "descriptor_type": descriptor_type,
              "symantics_type": semantics_type,
              "k": k,
-             "label": label_vs,
-             "latent_symantic": latent_symantics2[i].tolist()
-             }
-            for i in range(len(ids2))
-        ]
+             "label": "unknown",
+             "latent_symantic": latent_symantics[len(ids1)-1].tolist()
+             })
+        for i in range(len(ids2)):
+            records.append(
+                {"imageid": ids2[i],
+                 "descriptor_type": descriptor_type,
+                 "symantics_type": semantics_type,
+                 "k": k,
+                 "label": label_vs,
+                 "latent_symantic": latent_symantics[len(ids1) + i].tolist()
+                 })
 
-    return records1, records2
+    return records
 
 
 def starter(feature_model, dimension_reduction, k, label, imageID):
@@ -138,7 +143,7 @@ def starter(feature_model, dimension_reduction, k, label, imageID):
     mongo_url = config_object.mongo_url()
     database_name = config_object.database_name()
     collection_name = config_object.collection_name()
-    meta_collection_name = config_object.k_metadata_collection_name()
+    meta_collection_name = config_object.metadata_collection_name()
 
     try:
         connection = MongoClient(mongo_url)
@@ -154,9 +159,8 @@ def starter(feature_model, dimension_reduction, k, label, imageID):
         collection.insert_many(records)
 
         meta_collection.remove()
-        records1, records2 = helper(feature_model, dimension_reduction, k, label, collection, config_object)
-        meta_collection.insert_many(records1)
-        meta_collection.insert_many(records2)
+        records = helper(feature_model, dimension_reduction, k, label, collection, config_object, imageID)
+        meta_collection.insert_many(records)
         findlabel(feature_model, dimension_reduction, k, label, meta_collection, config_object, imageID)
 
     except Exception as e:
