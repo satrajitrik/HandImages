@@ -85,7 +85,7 @@ def helper(feature_model, dimension_reduction, k, label, collection, config_obje
     semantics_type = LatentSymanticsType(dimension_reduction).symantics_type
     label_given, label_vs = findLabels(label)
 
-    ids1, ids2, feature_vector1, feature_vector2 = [], [], [], []
+    ids1, ids2, feature_vector = [], [], [], []
     if label < 5:
         for subject in collection.find({"aspectOfHand": {"$regex": label_given}}, {"imageName": 1}):
             image_id = subject['imageName']
@@ -93,9 +93,9 @@ def helper(feature_model, dimension_reduction, k, label, collection, config_obje
             image = cv2.imread(img_path)
             ids1.append(image_id.replace(".jpg", ""));
             feature_descriptor = Descriptor(image, feature_model).feature_descriptor
-            feature_vector1.append(feature_descriptor);
+            feature_vector.append(feature_descriptor);
 
-        feature_vector1.append(Descriptor(cv2.imread(config_object.read_path() + imageID), feature_model).feature_descriptor)
+        feature_vector.append(Descriptor(cv2.imread(config_object.read_path() + imageID), feature_model).feature_descriptor)
 
         for subject in collection.find({"aspectOfHand": {"$regex": label_vs}}, {"imageName": 1}):
             image_id = subject['imageName']
@@ -103,9 +103,9 @@ def helper(feature_model, dimension_reduction, k, label, collection, config_obje
             image = cv2.imread(img_path)
             ids2.append(image_id.replace(".jpg", ""));
             feature_descriptor = Descriptor(image, feature_model).feature_descriptor
-            feature_vector1.append(feature_descriptor);
+            feature_vector.append(feature_descriptor);
 
-        latent_symantics = LatentSymantics(np.array(feature_vector1), k, dimension_reduction).latent_symantics
+        latent_symantics = LatentSymantics(np.array(feature_vector), k, dimension_reduction).latent_symantics
 
         records = [
             {"imageid": ids1[i],
