@@ -49,7 +49,7 @@ def findlabel(feature_model, dimension_reduction, k, label, collection, config_o
         feature_descriptor.append(Descriptor(image, feature_model).feature_descriptor)
         source_latent_semantics = (collection.find_one(
             {"descriptor_type": descriptor_type, "symantics_type": semantics_type, "label": "unknown"},
-                {"latent_symantic": 1})).get("latent_symantic")
+            {"latent_symantic": 1})).get("latent_symantic")
         for y in collection.find(
                 {"descriptor_type": descriptor_type, "symantics_type": semantics_type, "label": label_given},
                 {"latent_symantic": 1, "imageid": 1}):
@@ -85,7 +85,7 @@ def helper(feature_model, dimension_reduction, k, label, collection, config_obje
     semantics_type = LatentSymanticsType(dimension_reduction).symantics_type
     label_given, label_vs = findLabels(label)
 
-    ids1, ids2, feature_vector = [], [], [], []
+    ids1, ids2, feature_vector = [], [], []
     if label < 5:
         for subject in collection.find({"aspectOfHand": {"$regex": label_given}}, {"imageName": 1}):
             image_id = subject['imageName']
@@ -95,7 +95,8 @@ def helper(feature_model, dimension_reduction, k, label, collection, config_obje
             feature_descriptor = Descriptor(image, feature_model).feature_descriptor
             feature_vector.append(feature_descriptor);
 
-        feature_vector.append(Descriptor(cv2.imread(config_object.read_path() + imageID), feature_model).feature_descriptor)
+        feature_vector.append(
+            Descriptor(cv2.imread(config_object.read_path() + imageID), feature_model).feature_descriptor)
 
         for subject in collection.find({"aspectOfHand": {"$regex": label_vs}}, {"imageName": 1}):
             image_id = subject['imageName']
@@ -115,7 +116,7 @@ def helper(feature_model, dimension_reduction, k, label, collection, config_obje
              "label": label_given,
              "latent_symantic": latent_symantics[i].tolist()
              }
-            for i in range(len(ids1)-1)
+            for i in range(len(ids1) - 1)
         ]
         records.append(
             {"imageid": imageID.replace(".jpg", ""),
@@ -123,7 +124,7 @@ def helper(feature_model, dimension_reduction, k, label, collection, config_obje
              "symantics_type": semantics_type,
              "k": k,
              "label": "unknown",
-             "latent_symantic": latent_symantics[len(ids1)-1].tolist()
+             "latent_symantic": latent_symantics[len(ids1) - 1].tolist()
              })
         for i in range(len(ids2)):
             records.append(
@@ -166,4 +167,5 @@ def starter(feature_model, dimension_reduction, k, label, imageID):
     except Exception as e:
         traceback.print_exc()
         print("Connection refused... ")
+
 
