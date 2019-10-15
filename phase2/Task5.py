@@ -63,13 +63,11 @@ def findlabel(feature_model, dimension_reduction, k, label, collection, config_o
                 {"descriptor_type": descriptor_type, "symantics_type": semantics_type, "label": label_vs},
                 {"latent_symantic": 1, "imageid": 1}):
             destination_latent_semantics = y.get("latent_symantic")
-            # print(destination_latent_semantics)
             similarity_vector_id = findsimilarity(source_latent_semantics, destination_latent_semantics)
             similarity_vector_vs[y.get("imageid")] = similarity_vector_id
 
-        vs_similarity_vector = sorted(similarity_vector_given.items(), key=lambda x: x[1])[:1]
-
-        if given_similarity_vector[0] < vs_similarity_vector[0]:
+        vs_similarity_vector = sorted(similarity_vector_vs.items(), key=lambda x: x[1])[:1]
+        if given_similarity_vector[0][1] < vs_similarity_vector[0][1]:
             print label_given
         else:
             print label_vs
@@ -94,9 +92,10 @@ def helper(feature_model, dimension_reduction, k, label, collection, config_obje
             ids1.append(image_id.replace(".jpg", ""));
             feature_descriptor = Descriptor(image, feature_model).feature_descriptor
             feature_vector.append(feature_descriptor);
-
-        feature_vector.append(
-            Descriptor(cv2.imread(config_object.read_path() + imageID), feature_model).feature_descriptor)
+        img_path = config_object.read_path() + imageID
+        image = cv2.imread(img_path)
+        feature_descriptor = Descriptor(image, feature_model).feature_descriptor
+        feature_vector.append(feature_descriptor)
 
         for subject in collection.find({"aspectOfHand": {"$regex": label_vs}}, {"imageName": 1}):
             image_id = subject['imageName']
@@ -105,7 +104,6 @@ def helper(feature_model, dimension_reduction, k, label, collection, config_obje
             ids2.append(image_id.replace(".jpg", ""));
             feature_descriptor = Descriptor(image, feature_model).feature_descriptor
             feature_vector.append(feature_descriptor);
-
         latent_symantics = LatentSymantics(np.array(feature_vector), k, dimension_reduction).latent_symantics
 
         records = [
@@ -167,5 +165,6 @@ def starter(feature_model, dimension_reduction, k, label, imageID):
     except Exception as e:
         traceback.print_exc()
         print("Connection refused... ")
+
 
 
