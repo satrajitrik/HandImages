@@ -92,6 +92,31 @@ Time taken for execution (sec):  756.19
 
 Input Task number:6
 Enter subject ID: 23
+[[1552, 0.009313301450430078], [507, 0.012875841659565013], [92, 0.013872316449429434]]
+Time taken for execution (sec):  756.1
+
+Input Task number:6
+Enter subject ID: 524
+[[506, 0.007878325026448474], [1531, 0.008849011172215482], [1089, 0.009712667154042398]]
+Time taken for execution (sec):  413.62
+
+Input Task number:6
+Enter subject ID: 88
+[[524, 0.010268284131651484], [506, 0.010322204437741678], [1550, 0.013548111541290875]]
+Time taken for execution (sec):  393.66
+
+
+# LDA
+Input Task number:6
+Enter subject ID: 0
+
+
+Input Task number:6
+Enter subject ID: 64
+
+
+Input Task number:6
+Enter subject ID: 23
 
 
 Input Task number:6
@@ -101,4 +126,4 @@ Enter subject ID: 524
 Input Task number:6
 Enter subject ID: 88
 
-
+###################################################################
