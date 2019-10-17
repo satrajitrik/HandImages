@@ -37,10 +37,10 @@ from scipy.spatial import distance
 
 
 def compare(source_subject, other_subjects, k=1, choice=1):
-    source_dorsal_latent_symantics = LatentSymantics(
+    _,source_dorsal_latent_symantics = LatentSymantics(
         np.transpose(source_subject["dorsal"]), k, choice
     ).latent_symantics
-    source_palmar_latent_symantics = LatentSymantics(
+    _,source_palmar_latent_symantics = LatentSymantics(
         np.transpose(source_subject["palmar"]), k, choice
     ).latent_symantics
 
@@ -60,10 +60,10 @@ def compare(source_subject, other_subjects, k=1, choice=1):
     distances = []
     for subject in other_subjects:
         if subject["gender"] == source_subject["gender"]:
-            other_dorsal_latent_symantics = LatentSymantics(
+            _,other_dorsal_latent_symantics = LatentSymantics(
                 np.transpose(subject["dorsal"]), k, choice
             ).latent_symantics
-            other_palmar_latent_symantics = LatentSymantics(
+            _,other_palmar_latent_symantics = LatentSymantics(
                 np.transpose(subject["palmar"]), k, choice
             ).latent_symantics
 

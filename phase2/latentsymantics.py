@@ -47,10 +47,13 @@ class LatentSymantics(object):
 
     def pca(self):
         if 0 < self.k < min(self.x.shape[0], self.x.shape[1]):
-            return PCA(n_components=self.k).fit_transform(self.x)
-        return PCA(n_components=min(self.x.shape[0], self.x.shape[1])).fit_transform(
-            self.x
-        )
+            pca = PCA(n_components=self.k)
+            transformed_data = pca.fit_transform(self.x)
+            return pca,transformed_data
+        else:
+            pca = PCA(n_components=min(self.x.shape[0], self.x.shape[1]))
+            transformed_data = pca.fit_transform(self.x)
+            return pca,transformed_data
 
     """
     	SVD Dimensionality Reduction
@@ -58,7 +61,8 @@ class LatentSymantics(object):
 
     def svd(self):
         svd = TruncatedSVD(n_components=self.k)
-        return svd.fit_transform(self.x)
+        transformed_data = svd.fit_transform(self.x)
+        return svd,transformed_data
 
     """
     	NMF Dimensionality Reduction
@@ -66,7 +70,8 @@ class LatentSymantics(object):
 
     def nmf(self):
         nmf = NMF(n_components=self.k)
-        return nmf.fit_transform(self.x)
+        transformed_data = nmf.fit_transform(self.x)
+        return nmf, transformed_data
 
     """
     	LDA Dimensionality Reduction
@@ -74,4 +79,5 @@ class LatentSymantics(object):
 
     def lda(self):
         lda = LatentDirichletAllocation(n_components=self.k)
-        return lda.fit_transform(self.x)
+        transformed_data = lda.fit_transform(self.x)
+        return lda,transformed_data

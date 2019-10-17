@@ -112,7 +112,8 @@ class Database(object):
             query_results = collection.find()
         connection.close()
 
-        return [item["image_id"] for item in query_results]
+        return [item["image_id"] for item in query_results], [[item["image_id"],item["male"],item["dorsal"],item["left_hand"],item["accessories"]] for item in query_results]
+
 
     def retrieve_subjects(self, subject_id):
         connection = self.open_connection()
