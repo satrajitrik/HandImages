@@ -1,10 +1,12 @@
 """
     Renamed scripts.py to preprocess.py
 """
+from gridfs import GridFS
 
 import functions
 import numpy as np
 import pandas
+import json
 
 from config import Config
 from pymongo import MongoClient
@@ -59,7 +61,14 @@ def insert_metadata_to_db(database, metadata):
 """
 
 
-def insert_subjects_metadata_to_db(database, metadata, feature_model=1):
+def insert_subjects_metadata_to_db(database, metadata, feature_model=2):
+    """
+    
+    :param database:
+    :param metadata:
+    :param feature_model:
+    :return:
+    """
     collection = database[Config().subjects_metadata_collection_name()]
 
     collection.drop()
@@ -90,13 +99,18 @@ def insert_subjects_metadata_to_db(database, metadata, feature_model=1):
             Config().read_all_path(), feature_model, palmar
         )
         print("For subject {}: Completed reading palmar images... ".format(subject_id))
-
+        
+        grid_fs = GridFS(database=database, collection=Config().subjects_metadata_collection_name())
+        with grid_fs.new_file() as dorsal_file:
+            dorsal_file.write(json.dumps(dorsal_image_vectors.tolist()).encode('utf-8'))
+        with grid_fs.new_file() as palmar_file:
+            palmar_file.write(json.dumps(palmar_image_vectors.tolist()).encode('utf-8'))
         output = collection.insert_one(
             {
                 "subject_id": subject_id,
                 "gender": gender,
-                "dorsal": dorsal_image_vectors.tolist(),
-                "palmar": palmar_image_vectors.tolist(),
+                "dorsal": dorsal_file._id,
+                "palmar": palmar_file._id,
             }
         )
         if not output.acknowledged:
