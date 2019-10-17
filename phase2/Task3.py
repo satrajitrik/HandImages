@@ -10,7 +10,7 @@ from labels import Labels
 
 def starter(feature_model, dimension_reduction, k, label_choice):
     path, pos = Config().read_path(), None
-    label, value = Labels(label_choice).label
+    label, value, _ = Labels(label_choice).label
     descriptor_type = DescriptorType(feature_model).descriptor_type
     symantics_type = LatentSymanticsType(dimension_reduction).symantics_type
 
