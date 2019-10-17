@@ -1,170 +1,107 @@
-from Config import Config
-from pymongo import MongoClient
-import traceback
-import pandas as pd
-from descriptor import DescriptorType, Descriptor
-from latentsymantics import LatentSymanticsType, LatentSymantics
 import cv2
+import functions
 import numpy as np
 
-
-def findLabels(label):
-    if label == 1:
-        return "left", "right"
-    elif label == 2:
-        return "right", "left"
-    elif label == 3:
-        return "dorsal", "palmar"
-    elif label == 4:
-        return "palmar", "dorsal"
-    elif label == 5:
-        return 1, 0
-    elif label == 6:
-        return 0, 1
-    elif label == 7:
-        return "male", "female"
-    elif label == 8:
-        return "female", "male"
+from config import Config
+from database import Database
+from descriptor import DescriptorType, Descriptor
+from labels import Labels
+from latentsymantics import LatentSymanticsType, LatentSymantics
 
 
-def findsimilarity(source_latent_semantics, destination_latent_semantics):
-    squares = 0
-    for i in range(len(destination_latent_semantics)):
-        squares = squares + (source_latent_semantics[i] - destination_latent_semantics[i]) ** 2
-    return squares ** 0.5
-
-
-def findlabel(feature_model, dimension_reduction, k, label, collection, config_object, image_id):
-    config_object = Config()
-    try:
-        feature_descriptor = []
-        similarity_vector_given = {}
-        similarity_vector_vs = {}
-        descriptor_type = DescriptorType(feature_model).descriptor_type
-        semantics_type = LatentSymanticsType(dimension_reduction).symantics_type
-        label_given, label_vs = findLabels(label)
-
-        img_path = config_object.read_path() + image_id
-        image = cv2.imread(img_path)
-        feature_descriptor.append(Descriptor(image, feature_model).feature_descriptor)
-        source_latent_semantics = (collection.find_one(
-            {"descriptor_type": descriptor_type, "symantics_type": semantics_type, "label": "unknown"},
-            {"latent_symantic": 1})).get("latent_symantic")
-        for y in collection.find(
-                {"descriptor_type": descriptor_type, "symantics_type": semantics_type, "label": label_given},
-                {"latent_symantic": 1, "imageid": 1}):
-            destination_latent_semantics = y.get("latent_symantic")
-            similarity_vector_id = findsimilarity(source_latent_semantics, destination_latent_semantics)
-            similarity_vector_given[y.get("imageid")] = similarity_vector_id
-
-        given_similarity_vector = sorted(similarity_vector_given.items(), key=lambda x: x[1])[:1]
-
-        for y in collection.find(
-                {"descriptor_type": descriptor_type, "symantics_type": semantics_type, "label": label_vs},
-                {"latent_symantic": 1, "imageid": 1}):
-            destination_latent_semantics = y.get("latent_symantic")
-            similarity_vector_id = findsimilarity(source_latent_semantics, destination_latent_semantics)
-            similarity_vector_vs[y.get("imageid")] = similarity_vector_id
-
-        vs_similarity_vector = sorted(similarity_vector_vs.items(), key=lambda x: x[1])[:1]
-        if given_similarity_vector[0][1] < vs_similarity_vector[0][1]:
-            print label_given
-        else:
-            print label_vs
-
-    except Exception as e:
-        traceback.print_exc()
-        print("Error finding m related images")
-
-
-def helper(feature_model, dimension_reduction, k, label, collection, config_object, imageID):
-    write_to = config_object.write_path()
+def findlabel(feature_model, dimension_reduction, k, label_choice, image_id):
     descriptor_type = DescriptorType(feature_model).descriptor_type
-    semantics_type = LatentSymanticsType(dimension_reduction).symantics_type
-    label_given, label_vs = findLabels(label)
+    symantics_type = LatentSymanticsType(dimension_reduction).symantics_type
+    label, value, complementary_value = Labels(label_choice).label
 
-    ids1, ids2, feature_vector = [], [], []
-    if label < 5:
-        for subject in collection.find({"aspectOfHand": {"$regex": label_given}}, {"imageName": 1}):
-            image_id = subject['imageName']
-            img_path = config_object.read_path() + image_id
-            image = cv2.imread(img_path)
-            ids1.append(image_id.replace(".jpg", ""));
-            feature_descriptor = Descriptor(image, feature_model).feature_descriptor
-            feature_vector.append(feature_descriptor);
-        img_path = config_object.read_path() + imageID
-        image = cv2.imread(img_path)
-        feature_descriptor = Descriptor(image, feature_model).feature_descriptor
-        feature_vector.append(feature_descriptor)
+    source = Database().retrieve_one(image_id, descriptor_type, symantics_type, k)
+    label_targets = Database().retrieve_many(
+        descriptor_type, symantics_type, k, label, value
+    )
+    complementary_label_targets = Database().retrieve_many(
+        descriptor_type, symantics_type, k, label, complementary_value
+    )
 
-        for subject in collection.find({"aspectOfHand": {"$regex": label_vs}}, {"imageName": 1}):
-            image_id = subject['imageName']
-            img_path = config_object.read_path() + image_id
-            image = cv2.imread(img_path)
-            ids2.append(image_id.replace(".jpg", ""));
-            feature_descriptor = Descriptor(image, feature_model).feature_descriptor
-            feature_vector.append(feature_descriptor);
-        latent_symantics = LatentSymantics(np.array(feature_vector), k, dimension_reduction).latent_symantics
+    label_distance_info = functions.compare(source, label_targets, 1, descriptor_type)
+    complementary_label_distance_info = functions.compare(
+        source, complementary_label_targets, 1, descriptor_type
+    )
 
-        records = [
-            {"imageid": ids1[i],
-             "descriptor_type": descriptor_type,
-             "symantics_type": semantics_type,
-             "k": k,
-             "label": label_given,
-             "latent_symantic": latent_symantics[i].tolist()
-             }
-            for i in range(len(ids1) - 1)
-        ]
-        records.append(
-            {"imageid": imageID.replace(".jpg", ""),
-             "descriptor_type": descriptor_type,
-             "symantics_type": semantics_type,
-             "k": k,
-             "label": "unknown",
-             "latent_symantic": latent_symantics[len(ids1) - 1].tolist()
-             })
-        for i in range(len(ids2)):
-            records.append(
-                {"imageid": ids2[i],
-                 "descriptor_type": descriptor_type,
-                 "symantics_type": semantics_type,
-                 "k": k,
-                 "label": label_vs,
-                 "latent_symantic": latent_symantics[len(ids1) + i].tolist()
-                 })
+    if label_distance_info[0][1] < complementary_label_distance_info[0][1]:
+        predicted = Labels(label_choice)._detupleize_label((label, value))
+    else:
+        predicted = Labels(label_choice)._detupleize_label((label, complementary_value))
 
-    return records
+    print(predicted)
 
 
-def starter(feature_model, dimension_reduction, k, label, imageID):
+def helper(feature_model, dimension_reduction, k, label_choice, image_id):
+    path, pos = Config().read_path(), None
+    descriptor_type = DescriptorType(feature_model).descriptor_type
+    symantics_type = LatentSymanticsType(dimension_reduction).symantics_type
+    label, value, complementary_value = Labels(label_choice).label
+
+    image = cv2.imread("{}{}{}".format(path, image_id, ".jpg"))
+    image_feature_vector = Descriptor(image, feature_model).feature_descriptor
+
+    label_filtered_image_ids = Database().retrieve_metadata_with_labels(label, value)
+    complementary_label_filtered_image_ids = Database().retrieve_metadata_with_labels(
+        label, complementary_value
+    )
+
+    if DescriptorType(feature_model).check_sift():
+        label_feature_vector, label_ids, label_pos = functions.process_files(
+            path, feature_model, label_filtered_image_ids
+        )
+        complementary_label_feature_vector, complementary_label_ids, complementary_label_pos = functions.process_files(
+            path, feature_model, complementary_label_filtered_image_ids
+        )
+        feature_vector = np.concatenate(
+            (
+                label_feature_vector,
+                complementary_label_feature_vector,
+                image_feature_vector,
+            )
+        )
+        pos = label_pos + complementary_label_pos + [image_feature_vector.shape[0]]
+    else:
+        label_feature_vector, label_ids = functions.process_files(
+            path, feature_model, label_filtered_image_ids
+        )
+        complementary_label_feature_vector, complementary_label_ids = functions.process_files(
+            path, feature_model, complementary_label_filtered_image_ids
+        )
+        feature_vector = np.concatenate(
+            (
+                label_feature_vector,
+                complementary_label_feature_vector,
+                np.array([image_feature_vector]),
+            )
+        )
+
+    ids = label_ids + complementary_label_ids + [image_id]
+
+    latent_symantics = LatentSymantics(
+        feature_vector, k, dimension_reduction
+    ).latent_symantics
+
+    records = functions.set_records(
+        ids, descriptor_type, symantics_type, k, latent_symantics, pos
+    )
+
+    for record in records:
+        if record["image_id"] == image_id:
+            record[label] = -1
+        elif record["image_id"] in label_ids:
+            record[label] = value
+        elif record["image_id"] in complementary_label_ids:
+            record[label] = complementary_value
+
+    Database().insert_many(records)
+
+
+def starter(feature_model, dimension_reduction, k, label_choice, imageID):
     config_object = Config()
-    mongo_url = config_object.mongo_url()
-    database_name = config_object.database_name()
-    collection_name = config_object.collection_name()
-    meta_collection_name = config_object.metadata_collection_name()
 
-    try:
-        connection = MongoClient(mongo_url)
-        database = connection[database_name]
-        collection = database[collection_name]
-        meta_collection = database[meta_collection_name]
-
-        # Function to parse csv to dictionary
-        df = pd.read_csv(config_object.metadata_csv())
-        records = df.to_dict(orient='records')
-
-        collection.remove()
-        collection.insert_many(records)
-
-        meta_collection.remove()
-        records = helper(feature_model, dimension_reduction, k, label, collection, config_object, imageID)
-        meta_collection.insert_many(records)
-        findlabel(feature_model, dimension_reduction, k, label, meta_collection, config_object, imageID)
-
-    except Exception as e:
-        traceback.print_exc()
-        print("Connection refused... ")
-
-
-
+    helper(feature_model, dimension_reduction, k, label_choice, imageID)
+    findlabel(feature_model, dimension_reduction, k, label_choice, imageID)

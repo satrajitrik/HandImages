@@ -24,6 +24,7 @@ class Database(object):
         database = connection[self.database_name]
         collection = database[self.collection_name]
 
+        collection.drop()
         collection.insert_many(records)
         connection.close()
 
@@ -101,12 +102,12 @@ class Database(object):
 
         return query_results
 
-    def retrieve_metadata_with_labels(self, label, value):
+    def retrieve_metadata_with_labels(self, label=None, value=None):
         connection = self.open_connection()
         database = connection[self.database_name]
         collection = database[Config().metadata_collection_name()]
-        
-        if label and value:
+
+        if label:
             query_results = collection.find({label: value})
         else:
             query_results = collection.find()

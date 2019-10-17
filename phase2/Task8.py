@@ -6,8 +6,8 @@ from latentsymantics import LatentSymantics
 
 def starter(k):
     # Get all the metadata from DB
-    metadata_query_output = Database().retrieve_metadata_with_labels(None, None)
-    
+    metadata_query_output = Database().retrieve_metadata_with_labels()
+
     """
     Column index - Feature:
     0 - Left
@@ -23,14 +23,15 @@ def starter(k):
     """
     image_metadata_matrix = numpy.zeros((metadata_query_output.count(), 8))
     for index, row in enumerate(image_metadata_matrix):
-        image_metadata_matrix[index][0] = row['left_hand']
-        image_metadata_matrix[index][1] = 1 - row['left_hand']
-        image_metadata_matrix[index][2] = row['dorsal']
-        image_metadata_matrix[index][3] = 1 - row['dorsal']
-        image_metadata_matrix[index][4] = row['accessories']
-        image_metadata_matrix[index][5] = 1 - row['accessories']
-        image_metadata_matrix[index][6] = row['male']
-        image_metadata_matrix[index][7] = 1 - row['male']
-    
-    image_metadata_nmf_semantics = LatentSymantics(image_metadata_matrix, k, choice=3).latent_symantics     # Choice 3 is NMF
-    
+        image_metadata_matrix[index][0] = row["left_hand"]
+        image_metadata_matrix[index][1] = 1 - row["left_hand"]
+        image_metadata_matrix[index][2] = row["dorsal"]
+        image_metadata_matrix[index][3] = 1 - row["dorsal"]
+        image_metadata_matrix[index][4] = row["accessories"]
+        image_metadata_matrix[index][5] = 1 - row["accessories"]
+        image_metadata_matrix[index][6] = row["male"]
+        image_metadata_matrix[index][7] = 1 - row["male"]
+
+    image_metadata_nmf_semantics = LatentSymantics(
+        image_metadata_matrix, k, choice=3
+    ).latent_symantics  # Choice 3 is NMF
