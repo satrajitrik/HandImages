@@ -1,3 +1,4 @@
+import functions
 import numpy as np
 
 from config import Config
@@ -36,59 +37,35 @@ from scipy.spatial import distance
 """
 
 
-def compare(source_subject, other_subjects, k=1, choice=1):
-    source_dorsal_latent_symantics = LatentSymantics(
-        np.transpose(source_subject["dorsal"]), k, choice
-    ).latent_symantics
-    source_palmar_latent_symantics = LatentSymantics(
-        np.transpose(source_subject["palmar"]), k, choice
-    ).latent_symantics
+def compare(source_subject, other_subjects, task, k=1, choice=1):
+    distances = []
 
-    source_dorsal_latent_symantics = [
-        x for item in source_dorsal_latent_symantics.tolist() for x in item
-    ]
-    source_palmar_latent_symantics = [
-        x for item in source_palmar_latent_symantics.tolist() for x in item
-    ]
-    source_latent_symantics = np.concatenate(
-        (
-            np.array(source_dorsal_latent_symantics),
-            np.array(source_palmar_latent_symantics),
-        )
+    source_latent_symantics = functions.concatenate_latent_symantics(
+        source_subject, k, choice
     )
 
-    distances = []
     for subject in other_subjects:
-        if subject["gender"] == source_subject["gender"]:
-            other_dorsal_latent_symantics = LatentSymantics(
-                np.transpose(subject["dorsal"]), k, choice
-            ).latent_symantics
-            other_palmar_latent_symantics = LatentSymantics(
-                np.transpose(subject["palmar"]), k, choice
-            ).latent_symantics
-
-            other_dorsal_latent_symantics = [
-                x for item in other_dorsal_latent_symantics.tolist() for x in item
-            ]
-            other_palmar_latent_symantics = [
-                x for item in other_palmar_latent_symantics.tolist() for x in item
-            ]
-            other_latent_symantics = np.concatenate(
-                (
-                    np.array(other_dorsal_latent_symantics),
-                    np.array(other_palmar_latent_symantics),
-                )
+        if (task == 6 and subject["gender"] == source_subject["gender"]) or task == 7:
+            other_latent_symantics = functions.concatenate_latent_symantics(
+                subject, k, choice
             )
 
             dist = distance.cosine(source_latent_symantics, other_latent_symantics)
 
             distances.append([subject["subject_id"], dist])
 
-    distances = sorted(distances, key=lambda x: x[1])
-    return distances[:3]
+    if task == 6:
+        return sorted(
+            functions.distance_to_similarity(distances),
+            key=lambda x: x[1],
+            reverse=True,
+        )
+
+    distances.append([source_subject["subject_id"], 0])
+    return sorted(functions.distance_to_similarity(distances), key=lambda x: x[0])
 
 
 def starter(subject_id):
     source_subject, other_subjects = Database().retrieve_subjects(subject_id)
 
-    print(compare(source_subject, other_subjects))
+    print(compare(source_subject, other_subjects, 6)[:3])

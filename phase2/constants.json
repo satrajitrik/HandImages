@@ -1,6 +1,9 @@
 {
 	"DATABASE_NAME": "mwdb_phase2",
 	"COLLECTION_NAME": "hands",
+	"METADATA_COLLECTION_NAME": "metadata",
+	"SUBJECTS_METADATA_COLLECTION_NAME": "subjects",
+	"SUBJECTS_SIMILARITY_COLLECTION_NAME": "subjects_similarity",
 	"MONGO_URL": "mongodb://localhost:27017/",
 	"READ_ALL_PATH": "/Users/satrajitmaitra/Downloads/Hands/",
 	"READ_PATH": "/Users/satrajitmaitra/Downloads/Dataset2/",
