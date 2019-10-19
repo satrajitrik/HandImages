@@ -24,6 +24,7 @@ class Database(object):
         database = connection[self.database_name]
         collection = database[self.collection_name]
 
+        collection.drop()
         collection.insert_many(records)
         connection.close()
 
@@ -101,21 +102,25 @@ class Database(object):
 
         return query_results
 
-    def retrieve_metadata_with_labels(self, label, value):
+    def retrieve_metadata_with_labels(self, label=None, value=None):
         connection = self.open_connection()
         database = connection[self.database_name]
         collection = database[Config().metadata_collection_name()]
-        
-        if label and value:
+
+        if label:
             query_results = collection.find({label: value})
         else:
             query_results = collection.find()
         connection.close()
 
-        return [item["image_id"] for item in query_results], [[item["image_id"],item["male"],item["dorsal"],item["left_hand"],item["accessories"]] for item in query_results]
-
+        return query_results
 
     def retrieve_subjects(self, subject_id):
+        """
+
+        :param subject_id:
+        :return:
+        """
         connection = self.open_connection()
         database = connection[self.database_name]
         collection = database[Config().subjects_metadata_collection_name()]
@@ -125,3 +130,23 @@ class Database(object):
         connection.close()
 
         return source_subject_info, other_subjects_info
+
+    def retrieve_all_subject_ids(self):
+        connection = self.open_connection()
+        database = connection[self.database_name]
+        collection = database[Config().subjects_metadata_collection_name()]
+
+        query_results = collection.find()
+        connection.close()
+
+        return sorted([item["subject_id"] for item in query_results])
+
+    def retrieve_subject_similarities(self, subject_id):
+        connection = self.open_connection()
+        database = connection[self.database_name]
+        collection = database[Config().subjects_similarity_collection_name()]
+
+        query_results = collection.find_one({"subject_id": subject_id})
+        connection.close()
+
+        return query_results["similarity_values"]

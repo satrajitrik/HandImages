@@ -1,12 +1,15 @@
 """
-    Renamed scripts.py to preprocess.py
+    Run this script first before anything else
 """
-
 import functions
+import json
 import numpy as np
 import pandas
+import Task6
 
 from config import Config
+from database import Database
+from gridfs import GridFS
 from pymongo import MongoClient
 
 
@@ -60,6 +63,13 @@ def insert_metadata_to_db(database, metadata):
 
 
 def insert_subjects_metadata_to_db(database, metadata, feature_model=1):
+    """
+    
+    :param database:
+    :param metadata:
+    :param feature_model:
+    :return:
+    """
     collection = database[Config().subjects_metadata_collection_name()]
 
     collection.drop()
@@ -91,12 +101,19 @@ def insert_subjects_metadata_to_db(database, metadata, feature_model=1):
         )
         print("For subject {}: Completed reading palmar images... ".format(subject_id))
 
+        grid_fs = GridFS(
+            database=database, collection=Config().subjects_metadata_collection_name()
+        )
+        with grid_fs.new_file() as dorsal_file:
+            dorsal_file.write(json.dumps(dorsal_image_vectors.tolist()).encode("utf-8"))
+        with grid_fs.new_file() as palmar_file:
+            palmar_file.write(json.dumps(palmar_image_vectors.tolist()).encode("utf-8"))
         output = collection.insert_one(
             {
                 "subject_id": subject_id,
                 "gender": gender,
-                "dorsal": dorsal_image_vectors.tolist(),
-                "palmar": palmar_image_vectors.tolist(),
+                "dorsal": dorsal_file._id,
+                "palmar": palmar_file._id,
             }
         )
         if not output.acknowledged:
@@ -105,10 +122,36 @@ def insert_subjects_metadata_to_db(database, metadata, feature_model=1):
     print("Inserted Metadata for subjects: ", len(metadata), "rows")
 
 
+def insert_subject_similarities_to_db(database):
+    collection = database[Config().subjects_similarity_collection_name()]
+    subject_ids = Database().retrieve_all_subject_ids()
+
+    collection.drop()
+    for subject_id in subject_ids:
+        print("Processing subject: {}".format(subject_id))
+        source_subject, other_subjects = Database().retrieve_subjects(subject_id)
+        similarity_values = [
+            similarity
+            for _, similarity in Task6.compare(source_subject, other_subjects, 7)
+        ]
+        output = collection.insert_one(
+            {"subject_id": subject_id, "similarity_values": similarity_values}
+        )
+        if not output.acknowledged:
+            print("ERROR: Could not save ", subject_id)
+            exit(1)
+        print("Completed processing subject: {}".format(subject_id))
+    print("Inserted similarity values for subjects: ", len(subject_ids), "rows")
+
+
 if __name__ == "__main__":
     connection = MongoClient(Config().mongo_url())
     database = connection[Config().database_name()]
     metadata = pandas.read_csv(Config().metadata_file())
 
+    """
+        NOTE: Order must be maintained for the following function calls
+    """
     insert_metadata_to_db(database, metadata)
     insert_subjects_metadata_to_db(database, metadata)
+    insert_subject_similarities_to_db(database)

@@ -7,8 +7,10 @@ from sklearn.decomposition import NMF
 
 def starter(k):
 
+
     result = Database().retrieve_metadata_with_labels(None, None)
     metadata_query_output =  [[item["image_id"],item["male"],item["dorsal"],item["left_hand"],item["accessories"]] for item in result]
+
     """
     Column index - Feature:
     0 - Male
@@ -21,7 +23,7 @@ def starter(k):
     7 - Without accessories
     
     Image-Metadata matrix with columns = 8 and rows = # of images
-    # """
+    """
     print(metadata_query_output)
     image_metadata_matrix = numpy.zeros(shape=(8,len(metadata_query_output)))
     for i in range(len(metadata_query_output)):
@@ -50,3 +52,4 @@ def starter(k):
             print("top 50 features for latent_topic #",index)
             print([i for i in latent_feature.argsort()[-50:]])
             print("\n")
+

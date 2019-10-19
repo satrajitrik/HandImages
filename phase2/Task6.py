@@ -1,9 +1,12 @@
+import functions
 import numpy as np
 
 from config import Config
 from database import Database
 from latentsymantics import LatentSymantics
+from pymongo import MongoClient
 from scipy.spatial import distance
+from timeit import default_timer as timer
 
 
 """
@@ -12,17 +15,13 @@ from scipy.spatial import distance
     dorsal/palmar feature vectors are represented as numpy arrays of the form 
     ((# of dorsal/palmar images for a subject) X (feature descriptor length)) 
     where the # of rows is variable but the # of columns is constant for a given feature descriptor.
-
     We take the transpose of these feature vector matrices to represent all dorsal/palmar images 
     as features instead of objects for a given subject and apply dimensionality reduction 
     to reduce the number of features to 1 feature/image which best represents the subject. 
-
     After applying dimensionality reduction, we get 1 dorsal latent symantics matrix and 1 
     palmar latent symantics matrix. The shape of these matrices are same. ie. (1 X (feature descriptor length))
-
     We now concatenate the dorsal and palmar latent symantics and apply cosime similarity to
     compare two subjects to get the result.
-
     Parameters:
     k = 1 (Reduced dimension)
     choice: {
@@ -31,64 +30,42 @@ from scipy.spatial import distance
 	    3: NMF,
 	    4: LDA
     }
-
     NOTE: Checked using Color moments with PCA. You guys can check for others.
 """
 
 
-def compare(source_subject, other_subjects, k=1, choice=1):
-    _,source_dorsal_latent_symantics = LatentSymantics(
-        np.transpose(source_subject["dorsal"]), k, choice
-    ).latent_symantics
-    _,source_palmar_latent_symantics = LatentSymantics(
-        np.transpose(source_subject["palmar"]), k, choice
-    ).latent_symantics
+def compare(source_subject, other_subjects, task, k=1, choice=1):
+    distances = []
 
-    source_dorsal_latent_symantics = [
-        x for item in source_dorsal_latent_symantics.tolist() for x in item
-    ]
-    source_palmar_latent_symantics = [
-        x for item in source_palmar_latent_symantics.tolist() for x in item
-    ]
-    source_latent_symantics = np.concatenate(
-        (
-            np.array(source_dorsal_latent_symantics),
-            np.array(source_palmar_latent_symantics),
-        )
+    source_latent_symantics = functions.concatenate_latent_symantics(
+        source_subject, k, choice
     )
 
-    distances = []
     for subject in other_subjects:
-        if subject["gender"] == source_subject["gender"]:
-            _,other_dorsal_latent_symantics = LatentSymantics(
-                np.transpose(subject["dorsal"]), k, choice
-            ).latent_symantics
-            _,other_palmar_latent_symantics = LatentSymantics(
-                np.transpose(subject["palmar"]), k, choice
-            ).latent_symantics
-
-            other_dorsal_latent_symantics = [
-                x for item in other_dorsal_latent_symantics.tolist() for x in item
-            ]
-            other_palmar_latent_symantics = [
-                x for item in other_palmar_latent_symantics.tolist() for x in item
-            ]
-            other_latent_symantics = np.concatenate(
-                (
-                    np.array(other_dorsal_latent_symantics),
-                    np.array(other_palmar_latent_symantics),
-                )
+        if (task == 6 and subject["gender"] == source_subject["gender"]) or task == 7:
+            other_latent_symantics = functions.concatenate_latent_symantics(
+                subject, k, choice
             )
 
             dist = distance.cosine(source_latent_symantics, other_latent_symantics)
 
             distances.append([subject["subject_id"], dist])
 
-    distances = sorted(distances, key=lambda x: x[1])
-    return distances[:3]
+    if task == 6:
+        return sorted(
+            functions.distance_to_similarity(distances),
+            key=lambda x: x[1],
+            reverse=True,
+        )
+
+    distances.append([source_subject["subject_id"], 0])
+    return sorted(functions.distance_to_similarity(distances), key=lambda x: x[0])
 
 
 def starter(subject_id):
+    start_time = timer()
     source_subject, other_subjects = Database().retrieve_subjects(subject_id)
 
-    print(compare(source_subject, other_subjects))
+    print(compare(source_subject, other_subjects, 6)[:3])
+    end_time = timer()
+    print("Time taken for execution (sec): ", round(end_time - start_time, 2))
