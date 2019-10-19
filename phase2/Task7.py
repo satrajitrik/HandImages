@@ -15,4 +15,14 @@ def starter(k):
 
     print(np.array(subject_similarities))
 
-    print(LatentSymantics(np.array(subject_similarities), k, 3).latent_symantics)
+    latent_symantics_model, _ = LatentSymantics(
+        np.array(subject_similarities), k, 3
+    ).latent_symantics
+
+    """
+        According to Helisha's term weight code change
+    """
+    for index, latent_feature in enumerate(latent_symantics_model.components_):
+        print("top 50 features for latent_topic #", index)
+        print([i for i in latent_feature.argsort()[-50:]])
+        print("\n")

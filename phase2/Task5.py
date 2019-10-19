@@ -44,10 +44,14 @@ def helper(feature_model, dimension_reduction, k, label_choice, image_id):
     image = cv2.imread("{}{}{}".format(path, image_id, ".jpg"))
     image_feature_vector = Descriptor(image, feature_model).feature_descriptor
 
-    label_filtered_image_ids = Database().retrieve_metadata_with_labels(label, value)
-    complementary_label_filtered_image_ids = Database().retrieve_metadata_with_labels(
-        label, complementary_value
-    )
+    label_filtered_image_ids = [
+        item["image_id"]
+        for item in Database().retrieve_metadata_with_labels(label, value)
+    ]
+    complementary_label_filtered_image_ids = [
+        item["image_id"]
+        for item in Database().retrieve_metadata_with_labels(label, complementary_value)
+    ]
 
     if DescriptorType(feature_model).check_sift():
         label_feature_vector, label_ids, label_pos = functions.process_files(
@@ -81,7 +85,7 @@ def helper(feature_model, dimension_reduction, k, label_choice, image_id):
 
     ids = label_ids + complementary_label_ids + [image_id]
 
-    latent_symantics = LatentSymantics(
+    _, latent_symantics = LatentSymantics(
         feature_vector, k, dimension_reduction
     ).latent_symantics
 
