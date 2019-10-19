@@ -24,7 +24,6 @@ def starter(k):
     
     Image-Metadata matrix with columns = 8 and rows = # of images
     """
-    print(metadata_query_output)
     image_metadata_matrix = numpy.zeros(shape=(8,len(metadata_query_output)))
     for i in range(len(metadata_query_output)):
 
