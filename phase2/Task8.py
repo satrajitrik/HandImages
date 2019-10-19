@@ -6,8 +6,9 @@ import functions
 from sklearn.decomposition import NMF
 
 def starter(k):
-    # Get all the metadata from DB
-    _,metadata_query_output = Database().retrieve_metadata_with_labels1(None, None)
+
+    result = Database().retrieve_metadata_with_labels(None, None)
+    metadata_query_output =  [[item["image_id"],item["male"],item["dorsal"],item["left_hand"],item["accessories"]] for item in result]
     """
     Column index - Feature:
     0 - Male
@@ -21,6 +22,7 @@ def starter(k):
     
     Image-Metadata matrix with columns = 8 and rows = # of images
     # """
+    print(metadata_query_output)
     image_metadata_matrix = numpy.zeros(shape=(8,len(metadata_query_output)))
     for i in range(len(metadata_query_output)):
 
@@ -35,15 +37,16 @@ def starter(k):
 
     metadataspace = image_metadata_matrix.transpose()
 
+    print("K latent_symantics in image_space")
     imagespace_NMF_model,imagespace_latent_symantics = LatentSymantics(image_metadata_matrix, k, choice=3).latent_symantics # [8 X 11k] to [8 X 4] ((11k)d to 4d)
     for index,latent_feature in enumerate(imagespace_NMF_model.components_):
             print("top 50 features for latent_topic #",index)
             print([i for i in latent_feature.argsort()[-50:]])
             print("\n")
 
+    print("K latent_symantics in metadata_space")
     metadataspace_NMF_model,metadataspace_latent_symantics = LatentSymantics(metadataspace, k, choice=3).latent_symantics # [11k X 8] to [11k X 4] (8d to 4d)
     for index,latent_feature in enumerate(metadataspace_NMF_model.components_):
             print("top 50 features for latent_topic #",index)
             print([i for i in latent_feature.argsort()[-50:]])
             print("\n")
-
