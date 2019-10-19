@@ -117,7 +117,7 @@ class Database(object):
 
     def retrieve_subjects(self, subject_id):
         """
-        
+
         :param subject_id:
         :return:
         """
