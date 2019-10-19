@@ -130,3 +130,23 @@ class Database(object):
         connection.close()
 
         return source_subject_info, other_subjects_info
+
+    def retrieve_all_subject_ids(self):
+        connection = self.open_connection()
+        database = connection[self.database_name]
+        collection = database[Config().subjects_metadata_collection_name()]
+
+        query_results = collection.find()
+        connection.close()
+
+        return sorted([item["subject_id"] for item in query_results])
+
+    def retrieve_subject_similarities(self, subject_id):
+        connection = self.open_connection()
+        database = connection[self.database_name]
+        collection = database[Config().subjects_similarity_collection_name()]
+
+        query_results = collection.find_one({"subject_id": subject_id})
+        connection.close()
+
+        return query_results["similarity_values"]

@@ -1,6 +1,7 @@
 """
     Utility functions
 """
+import math
 import numpy as np
 import os
 from queue import PriorityQueue
@@ -9,6 +10,7 @@ import cv2
 from scipy.spatial import distance
 
 from descriptor import Descriptor, DescriptorType
+from latentsymantics import LatentSymantics
 
 
 def process_files(path, feature_model, filtered_image_ids=None):
@@ -95,6 +97,10 @@ def sift_distance(source_vector, target_vector):
     return float(matches) / len(source_vector)
 
 
+def distance_to_similarity(distances):
+    return [[id, (1 / math.exp(distance))] for id, distance in distances]
+
+
 def compare(source, targets, m, descriptor_type):
     targets = [
         {"image_id": item["image_id"], "latent_symantics": item["latent_symantics"]}
@@ -117,4 +123,30 @@ def compare(source, targets, m, descriptor_type):
             )
         distances.append(image_distance_info)
 
-    return sorted(distances, key=lambda x: x[1])[:m]
+    return sorted(distance_to_similarity(distances), key=lambda x: x[1], reverse=True)[
+        :m
+    ]
+
+
+"""
+    NOTE: If using LBP, use GridFS over here to extract vectors
+"""
+
+
+def concatenate_latent_symantics(subject, k, choice):
+    dorsal_latent_symantics = LatentSymantics(
+        np.transpose(subject["dorsal"]), k, choice
+    ).latent_symantics
+    palmar_latent_symantics = LatentSymantics(
+        np.transpose(subject["palmar"]), k, choice
+    ).latent_symantics
+
+    dorsal_latent_symantics = [
+        x for item in dorsal_latent_symantics.tolist() for x in item
+    ]
+    palmar_latent_symantics = [
+        x for item in palmar_latent_symantics.tolist() for x in item
+    ]
+    return np.concatenate(
+        (np.array(dorsal_latent_symantics), np.array(palmar_latent_symantics))
+    )

@@ -96,7 +96,9 @@ def main():
         Task6.starter(subject_id)
 
     elif task == 7:
-        pass
+        k = int(input("Enter k: "))
+        Task7.starter(k)
+
     elif task == 8:
         pass
     else:

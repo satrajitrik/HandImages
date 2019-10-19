@@ -22,12 +22,12 @@ def findlabel(feature_model, dimension_reduction, k, label_choice, image_id):
         descriptor_type, symantics_type, k, label, complementary_value
     )
 
-    label_distance_info = functions.compare(source, label_targets, 1, descriptor_type)
-    complementary_label_distance_info = functions.compare(
+    label_similarity_info = functions.compare(source, label_targets, 1, descriptor_type)
+    complementary_label_similarity_info = functions.compare(
         source, complementary_label_targets, 1, descriptor_type
     )
 
-    if label_distance_info[0][1] < complementary_label_distance_info[0][1]:
+    if label_similarity_info[0][1] > complementary_label_similarity_info[0][1]:
         predicted = Labels(label_choice)._detupleize_label((label, value))
     else:
         predicted = Labels(label_choice)._detupleize_label((label, complementary_value))
