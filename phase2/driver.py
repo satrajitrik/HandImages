@@ -100,7 +100,9 @@ def main():
         Task7.starter(k)
 
     elif task == 8:
-        pass
+        k = int(input("enter k : "))
+        Task8.starter(k)
+
     else:
         print("Enter Task number (1-8)")
 

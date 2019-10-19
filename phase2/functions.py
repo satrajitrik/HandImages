@@ -134,10 +134,10 @@ def compare(source, targets, m, descriptor_type):
 
 
 def concatenate_latent_symantics(subject, k, choice):
-    dorsal_latent_symantics = LatentSymantics(
+    _, dorsal_latent_symantics = LatentSymantics(
         np.transpose(subject["dorsal"]), k, choice
     ).latent_symantics
-    palmar_latent_symantics = LatentSymantics(
+    _, palmar_latent_symantics = LatentSymantics(
         np.transpose(subject["palmar"]), k, choice
     ).latent_symantics
 
