@@ -4,7 +4,9 @@ import numpy as np
 from config import Config
 from database import Database
 from latentsymantics import LatentSymantics
+from pymongo import MongoClient
 from scipy.spatial import distance
+from timeit import default_timer as timer
 
 
 """
@@ -66,6 +68,9 @@ def compare(source_subject, other_subjects, task, k=1, choice=1):
 
 
 def starter(subject_id):
+    start_time = timer()
     source_subject, other_subjects = Database().retrieve_subjects(subject_id)
 
     print(compare(source_subject, other_subjects, 6)[:3])
+    end_time = timer()
+    print("Time taken for execution (sec): ", round(end_time - start_time, 2))

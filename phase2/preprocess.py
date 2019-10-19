@@ -1,14 +1,15 @@
 """
     Run this script first before anything else
 """
-
 import functions
+import json
 import numpy as np
 import pandas
 import Task6
 
 from config import Config
 from database import Database
+from gridfs import GridFS
 from pymongo import MongoClient
 
 
@@ -62,6 +63,13 @@ def insert_metadata_to_db(database, metadata):
 
 
 def insert_subjects_metadata_to_db(database, metadata, feature_model=1):
+    """
+    
+    :param database:
+    :param metadata:
+    :param feature_model:
+    :return:
+    """
     collection = database[Config().subjects_metadata_collection_name()]
 
     collection.drop()
@@ -93,12 +101,19 @@ def insert_subjects_metadata_to_db(database, metadata, feature_model=1):
         )
         print("For subject {}: Completed reading palmar images... ".format(subject_id))
 
+        grid_fs = GridFS(
+            database=database, collection=Config().subjects_metadata_collection_name()
+        )
+        with grid_fs.new_file() as dorsal_file:
+            dorsal_file.write(json.dumps(dorsal_image_vectors.tolist()).encode("utf-8"))
+        with grid_fs.new_file() as palmar_file:
+            palmar_file.write(json.dumps(palmar_image_vectors.tolist()).encode("utf-8"))
         output = collection.insert_one(
             {
                 "subject_id": subject_id,
                 "gender": gender,
-                "dorsal": dorsal_image_vectors.tolist(),
-                "palmar": palmar_image_vectors.tolist(),
+                "dorsal": dorsal_file._id,
+                "palmar": palmar_file._id,
             }
         )
         if not output.acknowledged:

@@ -128,6 +128,11 @@ def compare(source, targets, m, descriptor_type):
     ]
 
 
+"""
+    NOTE: If using LBP, use GridFS over here to extract vectors
+"""
+
+
 def concatenate_latent_symantics(subject, k, choice):
     dorsal_latent_symantics = LatentSymantics(
         np.transpose(subject["dorsal"]), k, choice
