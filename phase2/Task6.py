@@ -15,17 +15,13 @@ from timeit import default_timer as timer
     dorsal/palmar feature vectors are represented as numpy arrays of the form 
     ((# of dorsal/palmar images for a subject) X (feature descriptor length)) 
     where the # of rows is variable but the # of columns is constant for a given feature descriptor.
-
     We take the transpose of these feature vector matrices to represent all dorsal/palmar images 
     as features instead of objects for a given subject and apply dimensionality reduction 
     to reduce the number of features to 1 feature/image which best represents the subject. 
-
     After applying dimensionality reduction, we get 1 dorsal latent symantics matrix and 1 
     palmar latent symantics matrix. The shape of these matrices are same. ie. (1 X (feature descriptor length))
-
     We now concatenate the dorsal and palmar latent symantics and apply cosime similarity to
     compare two subjects to get the result.
-
     Parameters:
     k = 1 (Reduced dimension)
     choice: {
@@ -34,7 +30,6 @@ from timeit import default_timer as timer
 	    3: NMF,
 	    4: LDA
     }
-
     NOTE: Checked using Color moments with PCA. You guys can check for others.
 """
 

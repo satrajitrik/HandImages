@@ -1,14 +1,18 @@
 """
     Utility functions
 """
+import json
 import math
 import numpy as np
 import os
 from queue import PriorityQueue
 
 import cv2
+from gridfs import GridFS
+from pymongo import MongoClient
 from scipy.spatial import distance
 
+from config import Config
 from descriptor import Descriptor, DescriptorType
 from latentsymantics import LatentSymantics
 
@@ -113,7 +117,6 @@ def cm_distance(source_vector, target_vector):
 
     return distance.euclidean(weighted_source_vector, weighted_dest_vector);
 
-
 def distance_to_similarity(distances):
     return [[id, (1 / math.exp(distance))] for id, distance in distances]
 
@@ -157,11 +160,20 @@ def compare(source, targets, m, descriptor_type):
 
 
 def concatenate_latent_symantics(subject, k, choice):
+    connection = MongoClient(Config().mongo_url())
+    database = connection[Config().database_name()]
+    
+    grid_fs = GridFS(database=database, collection=Config().subjects_metadata_collection_name())
+    with grid_fs.get(subject["dorsal"]) as dorsal_file:
+        dorsal_image_vectors = json.loads(dorsal_file.read().decode('utf-8'))
+    with grid_fs.get(subject["palmar"]) as palmar_file:
+        palmar_image_vectors = json.loads(palmar_file.read().decode('utf-8'))
+    
     _, dorsal_latent_symantics = LatentSymantics(
-        np.transpose(subject["dorsal"]), k, choice
+        np.transpose(dorsal_image_vectors), k, choice
     ).latent_symantics
     _, palmar_latent_symantics = LatentSymantics(
-        np.transpose(subject["palmar"]), k, choice
+        np.transpose(palmar_image_vectors), k, choice
     ).latent_symantics
 
     dorsal_latent_symantics = [

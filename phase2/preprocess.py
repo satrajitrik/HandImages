@@ -1,7 +1,6 @@
 """
     Run this script first before anything else
 """
-
 import functions
 import json
 import numpy as np
