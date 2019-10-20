@@ -101,8 +101,34 @@ def sift_distance(source_vector, target_vector):
     return float(matches) / len(source_vector)
 
 
+def cm_distance(source_vector, target_vector):
+    weight = [2, 1, 1, 2, 1, 1, 2, 1, 1]
+    weighted_source_vector = []
+    weighted_dest_vector = []
+    for i in range(0, len(source_vector), 9):
+        till_index = len(source_vector) - i
+        lower_range = min(9, till_index)
+        weighted_source_vector.extend(
+            [weight[j] * source_vector[i + j] for j in range(lower_range)]
+        )
+
+    for i in range(0, len(target_vector), 9):
+        till_index = len(target_vector) - i
+        lower_range = min(9, till_index)
+        weighted_dest_vector.extend(
+            [weight[j] * target_vector[i + j] for j in range(lower_range)]
+        )
+
+    return distance.euclidean(weighted_source_vector, weighted_dest_vector)
+
+
+"""
+    Might cause an issue
+"""
+
+
 def distance_to_similarity(distances):
-    return [[id, (1 / math.exp(distance))] for id, distance in distances]
+    return [[id, 1 / (1 + distance ** (0.25))] for id, distance in distances]
 
 
 def compare(source, targets, m, descriptor_type):
@@ -115,9 +141,14 @@ def compare(source, targets, m, descriptor_type):
     distances = []
     for target in targets:
         image_distance_info = [target["image_id"]]
+
         if descriptor_type == "sift":
             image_distance_info.append(
                 sift_distance(source["latent_symantics"], target["latent_symantics"])
+            )
+        elif descriptor_type == "cm":
+            image_distance_info.append(
+                cm_distance(source["latent_symantics"], target["latent_symantics"])
             )
         else:
             image_distance_info.append(
@@ -140,13 +171,15 @@ def compare(source, targets, m, descriptor_type):
 def concatenate_latent_symantics(subject, k, choice):
     connection = MongoClient(Config().mongo_url())
     database = connection[Config().database_name()]
-    
-    grid_fs = GridFS(database=database, collection=Config().subjects_metadata_collection_name())
+
+    grid_fs = GridFS(
+        database=database, collection=Config().subjects_metadata_collection_name()
+    )
     with grid_fs.get(subject["dorsal"]) as dorsal_file:
-        dorsal_image_vectors = json.loads(dorsal_file.read().decode('utf-8'))
+        dorsal_image_vectors = json.loads(dorsal_file.read().decode("utf-8"))
     with grid_fs.get(subject["palmar"]) as palmar_file:
-        palmar_image_vectors = json.loads(palmar_file.read().decode('utf-8'))
-    
+        palmar_image_vectors = json.loads(palmar_file.read().decode("utf-8"))
+
     _, dorsal_latent_symantics = LatentSymantics(
         np.transpose(dorsal_image_vectors), k, choice
     ).latent_symantics

@@ -2,7 +2,7 @@ import os
 
 import cv2
 
-import Task1, Task2, Task3, Task4, Task5, Task6, Task7, Task8
+import Task1, Task2, Task3, Task4, Task5, Task6, Task7, Task8, ExtraCredit
 from descriptor import Descriptor
 
 JSON_FILE_PATH = "/Users/satrajitmaitra/HandImages/constants.json"
@@ -102,9 +102,20 @@ def main():
     elif task == 8:
         k = int(input("enter k : "))
         Task8.starter(k)
-
+    elif task == 9:
+        feature_model = int(
+            input("Select the Feature Model:\n1. CM\t2. LBP\t3. HOG\t4. SIFT : ")
+        )
+        dimension_reduction = int(
+            input(
+                "Select the Dimension Reduction Technique:\n1. PCA\t2. SVD\t3. NMF\t4. LDA : "
+            )
+        )
+        k = int(input("Enter k: "))
+        visualizer = int(input("Enter Visualizer:\n1. Data \t2.Feature "))
+        ExtraCredit.starter(feature_model, dimension_reduction, k, visualizer)
     else:
-        print("Enter Task number (1-8)")
+        print("Enter Task number (1-9)")
 
 
 if __name__ == "__main__":

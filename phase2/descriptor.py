@@ -121,6 +121,7 @@ class Descriptor(object):
 
         y, u, v = cv2.split(img_out)
         # Defining needed variables to store mean,deviation, skew of different channels of an image
+
         meanOfY, meanofU, meanofV = [], [], []
         sdOfY, sdofU, sdofV = [], [], []
         skewOfY, skewofU, skewofV = [], [], []
@@ -154,12 +155,20 @@ class Descriptor(object):
                 sdofV.append(deviationimg[2])
 
                 # appending Skewness of each color channel aof every 100*100 sub matrix
-                min_skew = abs(np.nanmin([skew(arr_y.flatten()), skew(arr_u.flatten()), skew(arr_v.flatten())]))
+                min_skew = abs(
+                    np.nanmin(
+                        [
+                            skew(arr_y.flatten()),
+                            skew(arr_u.flatten()),
+                            skew(arr_v.flatten()),
+                        ]
+                    )
+                )
                 # Add the minimum (-ve value) to the skew to make it positive for NMF compatibility
                 skewOfY.append(np.add(skew(arr_y.flatten()), min_skew))
                 skewofU.append(np.add(skew(arr_u.flatten()), min_skew))
                 skewofV.append(np.add(skew(arr_v.flatten()), min_skew))
-                
+
         color_feature_vector = np.concatenate(
             [meanOfY, meanofU, meanofV, sdOfY, sdofU, sdofV, skewOfY, skewofU, skewofV],
             axis=0,
