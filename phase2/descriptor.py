@@ -125,6 +125,11 @@ class Descriptor(object):
         meanOfY, meanofU, meanofV = [], [], []
         sdOfY, sdofU, sdofV = [], [], []
         skewOfY, skewofU, skewofV = [], [], []
+<<<<<<< Updated upstream
+=======
+        color_feature_vector = []
+
+>>>>>>> Stashed changes
 
         for i in range(0, y_len, 100):
 
