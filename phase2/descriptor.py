@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import skimage.feature as sk_feature
 import skimage.transform as sk_transform
+from scipy.stats import skew
 from skimage.feature import local_binary_pattern
 
 
@@ -18,6 +19,11 @@ class DescriptorType(object):
             return "hog"
         else:
             return "sift"
+
+    def check_sift(self):
+        if self.descriptor_type == "sift":
+            return True
+        return False
 
 
 class Descriptor(object):
@@ -105,7 +111,7 @@ class Descriptor(object):
         return hog_feature_vector
 
     """
-    	# TODO: Color moments feature vector
+    	Color moments feature vector
     """
 
     def color_moments(self):
@@ -115,15 +121,11 @@ class Descriptor(object):
 
         y, u, v = cv2.split(img_out)
         # Defining needed variables to store mean,deviation, skew of different channels of an image
-        meanOfY = []
-        meanofU = []
-        meanofV = []
-        sdOfY = []
-        sdofU = []
-        sdofV = []
-        skewOfY = []
-        skewofU = []
-        skewofV = []
+
+        meanOfY, meanofU, meanofV = [], [], []
+        sdOfY, sdofU, sdofV = [], [], []
+        skewOfY, skewofU, skewofV = [], [], []
+
         color_feature_vector = []
 
         for i in range(0, y_len, 100):
@@ -149,6 +151,7 @@ class Descriptor(object):
                 sdOfY.append(deviationimg[0])
                 sdofU.append(deviationimg[1])
                 sdofV.append(deviationimg[2])
+
                 # appending Skewness of each color channel aof every 100*100 sub matrix
                 skewOfY.append(skew(arr_y.flatten()))
                 skewofU.append(skew(arr_u.flatten()))
@@ -157,4 +160,3 @@ class Descriptor(object):
         color_feature_vector = np.concatenate(
             [meanOfY, meanofU, meanofV, sdOfY, sdofU, sdofV, skewOfY, skewofU, skewofV],axis=0)
         return color_feature_vector
-    

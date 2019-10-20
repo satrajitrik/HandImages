@@ -1,7 +1,12 @@
 {
-	"DATABASE_NAME": "mwdb",
-	"COLLECTION_NAME": "hands",
+	"DATABASE_NAME": "handinfoset",
+	"COLLECTION_NAME": "handinfo",
+	"METADATA_COLLECTION_NAME": "metadata",
+	"SUBJECTS_METADATA_COLLECTION_NAME": "subjects",
+	"SUBJECTS_SIMILARITY_COLLECTION_NAME": "subjects_similarity",
 	"MONGO_URL": "mongodb://localhost:27017/",
-	"READ_PATH": "/Users/satrajitmaitra/Downloads/testset1/",
-	"WRITE_PATH": "/Users/satrajitmaitra/Downloads/Hands_features/"
+	"READ_ALL_PATH": "/Users/satrajitmaitra/Downloads/Hands/",
+	"READ_PATH": "C:/Users/spykar/Downloads/Books/CSE_515Multimedia/project/Dataset/Hands/",
+	"WRITE_PATH": "C:/Users/spykar/Downloads/Books/CSE_515Multimedia/project/Dataset/Output/",
+    "METADATA_FILE": "C:/Users/spykar/Downloads/Books/CSE_515Multimedia/project/Dataset/Smaller_Dataset.csv"
 }

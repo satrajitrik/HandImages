@@ -1,3 +1,5 @@
+import traceback
+
 from config import Config
 from pymongo import MongoClient
 
@@ -8,49 +10,68 @@ class Database(object):
         self.collection_name = Config().collection_name()
         self.mongo_url = Config().mongo_url()
 
-    def insert_many(self, records):
+    def open_connection(self):
         try:
             connection = MongoClient(self.mongo_url)
-            database = connection[self.database_name]
-            collection = database[self.collection_name]
-
-            collection.insert_many(records)
-            print("Successfully inserted into DB... ")
-            connection.close()
+            return connection
         except Exception as e:
             traceback.print_exc()
             print("Connection refused... ")
+        return None
 
-    def retrieve_many(self, descriptor_type, symantics_type, k):
-        try:
-            connection = MongoClient(self.mongo_url)
-            database = connection[self.database_name]
-            collection = database[self.collection_name]
+    def insert_many(self, records):
+        connection = self.open_connection()
+        database = connection[self.database_name]
+        collection = database[self.collection_name]
 
+        collection.drop()
+        collection.insert_many(records)
+        connection.close()
+
+        print("Successfully inserted into DB... ")
+
+    def retrieve_many(self, descriptor_type, symantics_type, k, label=None, value=-1):
+        connection = self.open_connection()
+        database = connection[self.database_name]
+        collection = database[self.collection_name]
+
+        if label:
             query_results = collection.find(
                 {
                     "$and": [
                         {"descriptor_type": descriptor_type},
                         {"symantics_type": symantics_type},
                         {"k": k},
+                        {label: value},
                     ]
                 }
             )
-            connection.close()
+        else:
+            query_results = collection.find(
+                {
+                    "$and": [
+                        {"descriptor_type": descriptor_type},
+                        {"symantics_type": symantics_type},
+                        {"k": k},
+                        {"male": -1},
+                        {"dorsal": -1},
+                        {"left_hand": -1},
+                        {"accessories": -1},
+                    ]
+                }
+            )
+        connection.close()
 
-            return [item for item in query_results]
-        except Exception as e:
-            traceback.print_exc()
-            print("Connection refused... ")
+        return [item for item in query_results]
 
-            return None
+    def retrieve_one(
+        self, image_id, descriptor_type, symantics_type, k, label=None, value=-1
+    ):
+        connection = self.open_connection()
+        database = connection[self.database_name]
+        collection = database[self.collection_name]
 
-    def retrieve_one(self, image_id, descriptor_type, symantics_type, k):
-        try:
-            connection = MongoClient(self.mongo_url)
-            database = connection[self.database_name]
-            collection = database[self.collection_name]
-
+        if label:
             query_results = collection.find_one(
                 {
                     "$and": [
@@ -58,14 +79,74 @@ class Database(object):
                         {"descriptor_type": descriptor_type},
                         {"symantics_type": symantics_type},
                         {"k": k},
+                        {label: value},
                     ]
                 }
             )
-            connection.close()
+        else:
+            query_results = collection.find_one(
+                {
+                    "$and": [
+                        {"image_id": image_id},
+                        {"descriptor_type": descriptor_type},
+                        {"symantics_type": symantics_type},
+                        {"k": k},
+                        {"male": -1},
+                        {"dorsal": -1},
+                        {"left_hand": -1},
+                        {"accessories": -1},
+                    ]
+                }
+            )
+        connection.close()
 
-            return query_results
-        except Exception as e:
-            traceback.print_exc()
-            print("Connection refused... ")
+        return query_results
 
-            return None
+    def retrieve_metadata_with_labels(self, label=None, value=None):
+        connection = self.open_connection()
+        database = connection[self.database_name]
+        collection = database[Config().metadata_collection_name()]
+
+        if label:
+            query_results = collection.find({label: value})
+        else:
+            query_results = collection.find()
+        connection.close()
+
+        return query_results
+
+    def retrieve_subjects(self, subject_id):
+        """
+        
+        :param subject_id:
+        :return:
+        """
+        connection = self.open_connection()
+        database = connection[self.database_name]
+        collection = database[Config().subjects_metadata_collection_name()]
+
+        source_subject_info = collection.find_one({"subject_id": subject_id})
+        other_subjects_info = collection.find({"subject_id": {"$ne": subject_id}})
+        connection.close()
+
+        return source_subject_info, other_subjects_info
+
+    def retrieve_all_subject_ids(self):
+        connection = self.open_connection()
+        database = connection[self.database_name]
+        collection = database[Config().subjects_metadata_collection_name()]
+
+        query_results = collection.find()
+        connection.close()
+
+        return sorted([item["subject_id"] for item in query_results])
+
+    def retrieve_subject_similarities(self, subject_id):
+        connection = self.open_connection()
+        database = connection[self.database_name]
+        collection = database[Config().subjects_similarity_collection_name()]
+
+        query_results = collection.find_one({"subject_id": subject_id})
+        connection.close()
+
+        return query_results["similarity_values"]

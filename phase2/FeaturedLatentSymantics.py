@@ -1,26 +1,10 @@
-import numpy as np
 from sklearn.decomposition import LatentDirichletAllocation
 from sklearn.decomposition import NMF
 from sklearn.decomposition import PCA
 from sklearn.decomposition import TruncatedSVD
 
 
-class LatentSymanticsType(object):
-    def __init__(self, choice):
-        self.symantics_type = self._symantics_type(choice)
-
-    def _symantics_type(self, choice):
-        if choice == 1:
-            return "pca"
-        elif choice == 2:
-            return "svd"
-        elif choice == 3:
-            return "nmf"
-        else:
-            return "lda"
-
-
-class LatentSymantics(object):
+class FLS(object):
     def __init__(self, x, k, choice):
         self.x = x
         self.k = k
@@ -47,10 +31,12 @@ class LatentSymantics(object):
 
     def pca(self):
         if 0 < self.k < min(self.x.shape[0], self.x.shape[1]):
-            pca = PCA(n_components=self.k)
-        else:
-            pca = PCA(n_components=min(self.x.shape[0], self.x.shape[1]))
-        return pca, pca.fit_transform(self.x)
+            pca= PCA(n_components=self.k)
+            transforemd=pca.fit_transform(self.x)
+            return pca.components_
+        pca= PCA(n_components=min(self.x.shape[0], self.x.shape[1]))
+        transforemd=pca.fit_transform(self.x);
+        return pca.components_
 
     """
     	SVD Dimensionality Reduction
@@ -58,7 +44,8 @@ class LatentSymantics(object):
 
     def svd(self):
         svd = TruncatedSVD(n_components=self.k)
-        return svd, svd.fit_transform(self.x)
+        transformed= svd.fit_transform(self.x)
+        return svd.components_
 
     """
     	NMF Dimensionality Reduction
@@ -66,7 +53,8 @@ class LatentSymantics(object):
 
     def nmf(self):
         nmf = NMF(n_components=self.k)
-        return nmf, nmf.fit_transform(self.x)
+        transformed=nmf.fit_transform(self.x)
+        return nmf.components_
 
     """
     	LDA Dimensionality Reduction
@@ -74,4 +62,5 @@ class LatentSymantics(object):
 
     def lda(self):
         lda = LatentDirichletAllocation(n_components=self.k)
-        return lda, lda.fit_transform(self.x)
+        transformed= lda.fit_transform(self.x)
+        return lda.components_

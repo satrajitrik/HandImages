@@ -2,8 +2,7 @@ import os
 
 import cv2
 
-import Task1, Task2, Task3, Task4, Task5, Task6, Task7, Task8
-from config import Config
+import Task1, Task2, Task3, Task4, Task5, Task6, Task7, Task8, ExtraCredit
 from descriptor import Descriptor
 
 JSON_FILE_PATH = "/Users/satrajitmaitra/HandImages/constants.json"
@@ -39,26 +38,84 @@ def main():
         Task2.starter(feature_model, dimension_reduction, k, image_id, m)
 
     elif task == 3:
-        feature_model = input(
-            "Select the Feature Model:\n1. CM\t2. LBP\t3. HOG\t4. SIFT : "
+        feature_model = int(
+            input("Select the Feature Model:\n1. CM\t2. LBP\t3. HOG\t4. SIFT : ")
         )
-        dimension_reduction = input(
-            "Select the Dimension Reduction Technique:\n1. PCA\t2. SVD\t3. NMF\t4. LDA : "
+        dimension_reduction = int(
+            input(
+                "Select the Dimension Reduction Technique:\n1. PCA\t2. SVD\t3. NMF\t4. LDA : "
+            )
         )
-        k = input("Enter k: ")
-        label = input("Select the label: 1. 2. 3. 4 ....")
+        k = int(input("Enter k: "))
+        label = int(
+            input(
+                "Select the label:\n1. Left\t2. Right\t3. Dorsal\t4. Palmar\n5. With accessories\t6. Without accessories\t7. Male\t8. Female: "
+            )
+        )
+        Task3.starter(feature_model, dimension_reduction, k, label)
+
     elif task == 4:
-        pass
+        feature_model = int(
+            input("Select the Feature Model:\n1. CM\t2. LBP\t3. HOG\t4. SIFT : ")
+        )
+        dimension_reduction = int(
+            input(
+                "Select the Dimension Reduction Technique:\n1. PCA\t2. SVD\t3. NMF\t4. LDA : "
+            )
+        )
+        k = int(input("Enter k: "))
+        label = int(
+            input(
+                "Select the label:\n1. Left\t2. Right\t3. Dorsal\t4. Palmar\n5. With accessories\t6. Without accessories\t7. Male\t8. Female: "
+            )
+        )
+        image_id = input("Enter image ID: ")
+        m = int(input("Enter m: "))
+        Task4.starter(feature_model, dimension_reduction, k, label, image_id, m)
+
     elif task == 5:
-        pass
+        feature_model = int(
+            input("Select the Feature Model:\n1. CM\t2. LBP\t3. HOG\t4. SIFT : ")
+        )
+        dimension_reduction = int(
+            input(
+                "Select the Dimension Reduction Technique:\n1. PCA\t2. SVD\t3. NMF\t4. LDA : "
+            )
+        )
+        k = int(input("Enter k: "))
+        label = int(
+            input(
+                "Select the label:\n1. Left\t2. Right\t3. Dorsal\t4. Palmar\n5. With accessories\t6. Without accessories\t7. Male\t8. Female: "
+            )
+        )
+        image_id = input("Enter image ID: ")
+        Task5.starter(feature_model, dimension_reduction, k, label, image_id)
+
     elif task == 6:
-        pass
+        subject_id = int(input("Enter subject ID: "))
+        Task6.starter(subject_id)
+
     elif task == 7:
-        pass
+        k = int(input("Enter k: "))
+        Task7.starter(k)
+
     elif task == 8:
-        pass
+        k = int(input("enter k : "))
+        Task8.starter(k)
+    elif task == 9:
+        feature_model = int(
+            input("Select the Feature Model:\n1. CM\t2. LBP\t3. HOG\t4. SIFT : ")
+        )
+        dimension_reduction = int(
+            input(
+                "Select the Dimension Reduction Technique:\n1. PCA\t2. SVD\t3. NMF\t4. LDA : "
+            )
+        )
+        k = int(input("Enter k: "))
+        visualizer = int(input("Enter Visualizer:\n1. Data \t2.Feature "))
+        ExtraCredit.starter(feature_model, dimension_reduction, k, visualizer)
     else:
-        print("Enter Task number (1-8)")
+        print("Enter Task number (1-9)")
 
 
 if __name__ == "__main__":
