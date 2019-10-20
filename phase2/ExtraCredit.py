@@ -5,7 +5,6 @@ import numpy as np
 from config import Config
 from descriptor import DescriptorType
 from latentsymantics import LatentSymantics, LatentSymanticsType
-from FeaturedLatentSymantics import FLS
 
 
 def starter(feature_model, dimension_reduction, k,visualizer):
@@ -32,12 +31,12 @@ def starter(feature_model, dimension_reduction, k,visualizer):
         k_th_eigenvector_all = pd.DataFrame(k_th_eigenvector_all)
         Visualizer.visualize_data_symantics(k_th_eigenvector_all, symantics_type, descriptor_type)
     elif visualizer == 2:
-        latent_symantics = FLS(x, k, dimension_reduction).latent_symantics
+        latent_symantics, _ = LatentSymantics(x, k, dimension_reduction).latent_symantics
         k_th_eigenvector_all = []
         for j in range(k):
             arr = []
             for i in range(len(ids)):
-                arr.append((str(ids[i]+".jpg"), np.dot(x[i], latent_symantics[j])))
+                arr.append((str(ids[i]+".jpg"), np.dot(x[i], latent_symantics.components_[j])))
                 #k_th_eigenvector_all[ids[i]] = np.dot(x[i], latent_symantics[j])
             arr.sort(key=lambda x: x[1], reverse=True)
             k_th_eigenvector_all.append(arr[:1])

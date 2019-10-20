@@ -125,11 +125,6 @@ class Descriptor(object):
         meanOfY, meanofU, meanofV = [], [], []
         sdOfY, sdofU, sdofV = [], [], []
         skewOfY, skewofU, skewofV = [], [], []
-<<<<<<< HEAD
-
-        color_feature_vector = []
-=======
->>>>>>> master
 
         for i in range(0, y_len, 100):
 

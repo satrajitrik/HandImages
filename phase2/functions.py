@@ -117,8 +117,13 @@ def cm_distance(source_vector, target_vector):
 
     return distance.euclidean(weighted_source_vector, weighted_dest_vector);
 
+
+"""
+    Might cause an issue
+"""
+
 def distance_to_similarity(distances):
-    return [[id, (1 / math.exp(distance))] for id, distance in distances]
+    return [[id, 1 / (1 + distance**(0.25))] for id, distance in distances]
 
 
 def compare(source, targets, m, descriptor_type):
@@ -131,7 +136,7 @@ def compare(source, targets, m, descriptor_type):
     distances = []
     for target in targets:
         image_distance_info = [target["image_id"]]
-        print(image_distance_info)
+        
         if descriptor_type == "sift":
             image_distance_info.append(
                 sift_distance(source["latent_symantics"], target["latent_symantics"])
@@ -140,7 +145,6 @@ def compare(source, targets, m, descriptor_type):
             image_distance_info.append(
                 cm_distance(source["latent_symantics"], target["latent_symantics"])
             )
-
         else:
             image_distance_info.append(
                 distance.euclidean(
@@ -148,10 +152,10 @@ def compare(source, targets, m, descriptor_type):
                 )
             )
         distances.append(image_distance_info)
-    return sorted(distances, key=lambda x: x[1])[:m]
-    # return sorted(distance_to_similarity(distances), key=lambda x: x[1], reverse=True)[
-    #     :m
-    # ]
+    
+    return sorted(distance_to_similarity(distances), key=lambda x: x[1], reverse=True)[
+        :m
+    ]
 
 
 """
