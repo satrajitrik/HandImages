@@ -36,4 +36,3 @@ def starter(feature_model, dimension_reduction, k, label_choice):
 
     print(latent_symantics)
     print("Done... ")
-

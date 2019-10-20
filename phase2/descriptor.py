@@ -131,14 +131,18 @@ class Descriptor(object):
             for j in range(0, x_len, 100):
                 # Slicing image into 100*100 matrix
                 # using numpy package to determine mean and deviation of sub blocks
-                meanimg = np.nanmean(img_out[i:i + 100, j:j + 100],
-                                     axis=tuple(range(img_out[i:i + 100, j:j + 100].ndim - 1)))
-                deviationimg = np.std(img_out[i:i + 100, j:j + 100],
-                                      axis=tuple(range(img_out[i:i + 100, j:j + 100].ndim - 1)))
+                meanimg = np.nanmean(
+                    img_out[i : i + 100, j : j + 100],
+                    axis=tuple(range(img_out[i : i + 100, j : j + 100].ndim - 1)),
+                )
+                deviationimg = np.std(
+                    img_out[i : i + 100, j : j + 100],
+                    axis=tuple(range(img_out[i : i + 100, j : j + 100].ndim - 1)),
+                )
 
-                arr_y = y[i:i + 100, j:j + 100]
-                arr_u = u[i:i + 100, j:j + 100]
-                arr_v = v[i:i + 100, j:j + 100]
+                arr_y = y[i : i + 100, j : j + 100]
+                arr_u = u[i : i + 100, j : j + 100]
+                arr_v = v[i : i + 100, j : j + 100]
 
                 # appending mean of each color channel of every 100*100 sub matrix
                 meanOfY.append(meanimg[0])
@@ -151,12 +155,22 @@ class Descriptor(object):
                 sdofV.append(deviationimg[2])
 
                 # appending Skewness of each color channel aof every 100*100 sub matrix
-                min_skew = abs(np.nanmin([skew(arr_y.flatten()), skew(arr_u.flatten()), skew(arr_v.flatten())]))
+                min_skew = abs(
+                    np.nanmin(
+                        [
+                            skew(arr_y.flatten()),
+                            skew(arr_u.flatten()),
+                            skew(arr_v.flatten()),
+                        ]
+                    )
+                )
                 # Add the minimum (-ve value) to the skew to make it positive for NMF compatibility
                 skewOfY.append(np.add(skew(arr_y.flatten()), min_skew))
                 skewofU.append(np.add(skew(arr_u.flatten()), min_skew))
                 skewofV.append(np.add(skew(arr_v.flatten()), min_skew))
-                
+
         color_feature_vector = np.concatenate(
-            [meanOfY, meanofU, meanofV, sdOfY, sdofU, sdofV, skewOfY, skewofU, skewofV],axis=0)
+            [meanOfY, meanofU, meanofV, sdOfY, sdofU, sdofV, skewOfY, skewofU, skewofV],
+            axis=0,
+        )
         return color_feature_vector

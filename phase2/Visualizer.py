@@ -7,7 +7,7 @@ from PIL import Image
 from PIL import ImageTk
 from config import Config
 
-img_dir=Config().read_path()
+img_dir = Config().read_path()
 thumbnail_size = (160, 120)
 symatics_width = 1200
 data_symantics_height = 600
@@ -22,12 +22,16 @@ def create_thumbnail(img_id):
     tn_img = cv2.resize(cv_img, thumbnail_size, interpolation=cv2.INTER_AREA)
     return tn_img
 
+
 def visualize_data_symantics(data_symnatics, symantics_type, descriptor_type):
     """ Function to visualize the Data to Latent Semantics Matrix """
     photos = []
     # Created a window
     window = tk.Tk()
-    title_txt = "Visualization of Data-Latent Semantics for %s with %s Feature Descriptors" % (symantics_type, descriptor_type)
+    title_txt = (
+        "Visualization of Data-Latent Semantics for %s with %s Feature Descriptors"
+        % (symantics_type, descriptor_type)
+    )
     window.title(title_txt)
 
     frame = HSF(window, symatics_width, data_symantics_height)
@@ -38,7 +42,9 @@ def visualize_data_symantics(data_symnatics, symantics_type, descriptor_type):
     ls_count = 1
     p_count = 0
     for ls_list in data_symnatics.values:
-        ls_label = tk.Label(frame.scrollable_frame, text='Latent Semantic %s' % ls_count)
+        ls_label = tk.Label(
+            frame.scrollable_frame, text="Latent Semantic %s" % ls_count
+        )
         ls_label.grid(row=v_row, column=img_col, columnspan=2)
         v_row += 1
         for img, score in ls_list:
@@ -67,7 +73,7 @@ def visualize_data_symantics(data_symnatics, symantics_type, descriptor_type):
         img_col += 2
         lbl_col += 2
 
-    frame.pack(expand=True, fill='both')
+    frame.pack(expand=True, fill="both")
     window.mainloop()
 
 
@@ -75,7 +81,10 @@ def visualize_feature_symantics(feature_symnatics, symantics_type, descriptor_ty
     """ Function to visualize the Feature to Latent Semantics Matrix."""
     # Create a window
     window = tk.Tk()
-    title_txt = "Visualization of Feature-Latent Semantics for %s with %s Feature Descriptors" % (symantics_type, descriptor_type)
+    title_txt = (
+        "Visualization of Feature-Latent Semantics for %s with %s Feature Descriptors"
+        % (symantics_type, descriptor_type)
+    )
     window.title(title_txt)
 
     frame = VSF(window, symatics_width, ftr_symatics_height)
@@ -85,7 +94,9 @@ def visualize_feature_symantics(feature_symnatics, symantics_type, descriptor_ty
     lbl_col = 1
     ls_count = 1
     for ls_list in feature_symnatics.values:
-        ls_label = tk.Label(frame.scrollable_frame, text='Latent Semantic %s' % ls_count)
+        ls_label = tk.Label(
+            frame.scrollable_frame, text="Latent Semantic %s" % ls_count
+        )
         ls_label.grid(row=v_row, column=ftr_col, columnspan=2)
         v_row += 1
         row = tk.Frame(frame.scrollable_frame, relief=tk.RIDGE, borderwidth=2)
@@ -109,6 +120,5 @@ def visualize_feature_symantics(feature_symnatics, symantics_type, descriptor_ty
         ftr_col += 2
         lbl_col += 2
 
-    frame.pack(expand=True, fill='both')
+    frame.pack(expand=True, fill="both")
     window.mainloop()
-
