@@ -34,7 +34,7 @@ def visualize_data_symantics(data_symnatics, symantics_type, descriptor_type):
     )
     window.title(title_txt)
 
-    frame = HSF(window, symatics_width, data_symantics_height)
+    frame = VSF(window, symatics_width, data_symantics_height)
 
     v_row = 0
     img_col = 0

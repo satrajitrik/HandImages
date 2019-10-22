@@ -7,7 +7,7 @@ class HSF(ttk.Frame):
         super().__init__(container)
 
         canvas = tk.Canvas(self, width=width, height=height)
-        scrollbar = ttk.Scrollbar(self, orient="horizontal", command=canvas.yview)
+        scrollbar = ttk.Scrollbar(self, orient="horizontal", command=canvas.xview)
         self.scrollable_frame = ttk.Frame(canvas)
 
         self.scrollable_frame.bind(
@@ -19,4 +19,4 @@ class HSF(ttk.Frame):
         canvas.configure(xscrollcommand=scrollbar.set)
 
         canvas.pack(side="left", fill="both", expand=True)
-        scrollbar.pack(side="right", fill="y")
+        scrollbar.pack(side="bottom", fill="x")
