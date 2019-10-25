@@ -41,7 +41,7 @@ def helper(feature_model, dimension_reduction, k, label_choice, image_id):
     symantics_type = LatentSymanticsType(dimension_reduction).symantics_type
     label, value, complementary_value = Labels(label_choice).label
 
-    image = cv2.imread("{}{}{}".format(path, image_id, ".jpg"))
+    image = cv2.imread("{}{}{}".format(Config().read_all_path(), image_id, ".jpg"))
     image_feature_vector = Descriptor(image, feature_model).feature_descriptor
 
     label_filtered_image_ids = [
