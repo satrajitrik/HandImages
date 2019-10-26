@@ -5,7 +5,6 @@ import functions
 import json
 import numpy as np
 import pandas
-import Task6
 
 from config import Config
 from database import Database
@@ -132,7 +131,7 @@ def insert_subject_similarities_to_db(database):
         source_subject, other_subjects = Database().retrieve_subjects(subject_id)
         similarity_values = [
             similarity
-            for _, similarity in Task6.compare(source_subject, other_subjects, 7)
+            for _, similarity in functions.subject_similarity(source_subject, other_subjects)
         ]
         output = collection.insert_one(
             {"subject_id": subject_id, "similarity_values": similarity_values}

@@ -4,11 +4,6 @@ from database import Database
 from latentsymantics import LatentSymantics
 
 
-"""
-    First run preprocess to store subject similarities to DB
-"""
-
-
 def starter(k):
     subject_similarities = []
     subject_ids = Database().retrieve_all_subject_ids()

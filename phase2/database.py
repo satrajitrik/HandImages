@@ -140,6 +140,16 @@ class Database(object):
 
         return sorted([item["subject_id"] for item in query_results])
 
+    def get_subject_gender(self, subject_id):
+        connection = self.open_connection()
+        database = connection[self.database_name]
+        collection = database[Config().subjects_metadata_collection_name()]
+
+        subject_gender = collection.find_one({"subject_id": subject_id})["gender"]
+        connection.close()
+
+        return subject_gender
+
     def retrieve_subject_similarities(self, subject_id):
         connection = self.open_connection()
         database = connection[self.database_name]

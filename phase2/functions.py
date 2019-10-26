@@ -122,10 +122,6 @@ def cm_distance(source_vector, target_vector):
     return distance.euclidean(weighted_source_vector, weighted_dest_vector)
 
 
-"""
-    Might cause an issue
-"""
-
 
 def distance_to_similarity(distances):
     return [[id, 1 / (1 + distance ** (0.25))] for id, distance in distances]
@@ -163,11 +159,6 @@ def compare(source, targets, m, descriptor_type):
     ]
 
 
-"""
-    NOTE: If using LBP, use GridFS over here to extract vectors
-"""
-
-
 def concatenate_latent_symantics(subject, k, choice):
     connection = MongoClient(Config().mongo_url())
     database = connection[Config().database_name()]
@@ -196,3 +187,43 @@ def concatenate_latent_symantics(subject, k, choice):
     return np.concatenate(
         (np.array(dorsal_latent_symantics), np.array(palmar_latent_symantics))
     )
+
+
+def subject_similarity(source_subject, other_subjects, k=1, choice=1):
+    """
+        Idea is to extract all dorsal and palmar feature descriptors for a given subject.
+    
+        Dorsal/Palmar feature vectors are represented as numpy arrays of the form 
+        ((# of dorsal/palmar images for a subject) X (feature descriptor length)) 
+        where the # of rows is variable but the # of columns is constant for a given feature descriptor.
+        We take the transpose of these feature vector matrices to represent all dorsal/palmar images 
+        as features instead of objects for a given subject and apply dimensionality reduction 
+        to reduce the number of features to 1 feature/image which best represents the subject. 
+        After applying dimensionality reduction, we get 1 dorsal latent symantics matrix and 1 
+        palmar latent symantics matrix. The shape of these matrices are same. ie. (1 X (feature descriptor length))
+        We now concatenate the dorsal and palmar latent symantics and apply cosime similarity to
+        compare two subjects to get the result.
+        Parameters:
+        k = 1 (Reduced dimension)
+        choice: {
+	        1: PCA,
+	        2: SVD,
+	        3: NMF,
+	        4: LDA
+        }
+    """
+    distances = []
+    source_latent_symantics = concatenate_latent_symantics(
+        source_subject, k, choice
+    )
+
+    for subject in other_subjects:
+        other_latent_symantics = concatenate_latent_symantics(
+            subject, k, choice
+        )
+
+        dist = distance.cosine(source_latent_symantics, other_latent_symantics)
+        distances.append([subject["subject_id"], dist])
+
+    distances.append([source_subject["subject_id"], 0])
+    return sorted(distance_to_similarity(distances), key=lambda x: x[0])
