@@ -23,5 +23,3 @@ class VSF(ttk.Frame):
         yscrollbar.pack(side="right", fill="y")
         xscrollbar.pack(side="bottom", fill="x")
         canvas.pack(side="top", fill="both", expand=True)
-
-

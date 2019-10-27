@@ -30,74 +30,27 @@ class Database(object):
 
         print("Successfully inserted into DB... ")
 
-    def retrieve_many(self, descriptor_type, symantics_type, k, label=None, value=-1):
+    def retrieve_many(self, task, label=None, value=None):
         connection = self.open_connection()
         database = connection[self.database_name]
         collection = database[self.collection_name]
 
         if label:
-            query_results = collection.find(
-                {
-                    "$and": [
-                        {"descriptor_type": descriptor_type},
-                        {"symantics_type": symantics_type},
-                        {"k": k},
-                        {label: value},
-                    ]
-                }
-            )
+            query_results = collection.find({"$and": [{"task": task}, {label: value}]})
         else:
-            query_results = collection.find(
-                {
-                    "$and": [
-                        {"descriptor_type": descriptor_type},
-                        {"symantics_type": symantics_type},
-                        {"k": k},
-                        {"male": -1},
-                        {"dorsal": -1},
-                        {"left_hand": -1},
-                        {"accessories": -1},
-                    ]
-                }
-            )
+            query_results = collection.find({"task": task})
         connection.close()
 
         return [item for item in query_results]
 
-    def retrieve_one(
-        self, image_id, descriptor_type, symantics_type, k, label=None, value=-1
-    ):
+    def retrieve_one(self, image_id, task):
         connection = self.open_connection()
         database = connection[self.database_name]
         collection = database[self.collection_name]
 
-        if label:
-            query_results = collection.find_one(
-                {
-                    "$and": [
-                        {"image_id": image_id},
-                        {"descriptor_type": descriptor_type},
-                        {"symantics_type": symantics_type},
-                        {"k": k},
-                        {label: value},
-                    ]
-                }
-            )
-        else:
-            query_results = collection.find_one(
-                {
-                    "$and": [
-                        {"image_id": image_id},
-                        {"descriptor_type": descriptor_type},
-                        {"symantics_type": symantics_type},
-                        {"k": k},
-                        {"male": -1},
-                        {"dorsal": -1},
-                        {"left_hand": -1},
-                        {"accessories": -1},
-                    ]
-                }
-            )
+        query_results = collection.find_one(
+            {"$and": [{"image_id": image_id}, {"task": task}]}
+        )
         connection.close()
 
         return query_results

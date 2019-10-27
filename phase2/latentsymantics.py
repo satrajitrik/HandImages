@@ -19,6 +19,11 @@ class LatentSymanticsType(object):
         else:
             return "lda"
 
+    def check_nmf_lda(self):
+        if self.symantics_type == "nmf" or self.symantics_type == "lda":
+            return True
+        return False
+
 
 class LatentSymantics(object):
     def __init__(self, x, k, choice):

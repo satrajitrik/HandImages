@@ -15,5 +15,4 @@ def starter(subject_id):
         and source_subject["gender"] == Database().get_subject_gender(id)
     ]
 
-    print(sorted(subject_similarity_info, key=lambda x:x[1], reverse=True)[:3])
-
+    print(sorted(subject_similarity_info, key=lambda x: x[1], reverse=True)[:3])

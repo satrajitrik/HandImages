@@ -13,11 +13,12 @@ from pymongo import MongoClient
 from scipy.spatial import distance
 
 from config import Config
+from database import Database
 from descriptor import Descriptor, DescriptorType
-from latentsymantics import LatentSymantics
+from latentsymantics import LatentSymantics, LatentSymanticsType
 
 
-def process_files(path, feature_model, filtered_image_ids=None):
+def process_files(path, feature_model, dimension_reduction, filtered_image_ids=None):
     files = os.listdir(path)
 
     ids, x = [], []
@@ -28,7 +29,9 @@ def process_files(path, feature_model, filtered_image_ids=None):
             print("Reading file: {}".format(file))
             image = cv2.imread("{}{}".format(path, file))
 
-            feature_descriptor = Descriptor(image, feature_model).feature_descriptor
+            feature_descriptor = Descriptor(
+                image, feature_model, dimension_reduction
+            ).feature_descriptor
             ids.append(file.replace(".jpg", ""))
             x.append(feature_descriptor)
 
@@ -51,7 +54,17 @@ def process_files(path, feature_model, filtered_image_ids=None):
     return np.array(x), ids
 
 
-def set_records(ids, descriptor_type, symantics_type, k, latent_symantics, pos):
+def set_records(
+    ids,
+    descriptor_type,
+    symantics_type,
+    k,
+    latent_symantics,
+    pos,
+    task,
+    label=None,
+    value=None,
+):
     records = []
     f, prev_start = 1 if pos else 0, 0
 
@@ -60,6 +73,7 @@ def set_records(ids, descriptor_type, symantics_type, k, latent_symantics, pos):
             "image_id": ids[i],
             "descriptor_type": descriptor_type,
             "symantics_type": symantics_type,
+            "task": task,
             "k": k,
             "male": -1,
             "dorsal": -1,
@@ -80,12 +94,54 @@ def set_records(ids, descriptor_type, symantics_type, k, latent_symantics, pos):
             record["latent_symantics"] = latent_symantics[i].tolist()
         records.append(record)
 
+    if label:
+        for record in records:
+            record[label] = value
+
     return records
 
 
-"""
-    Similarity method for SIFT. To be updated. Gives okayish results.
-"""
+def store_in_db(
+    feature_model,
+    dimension_reduction,
+    k,
+    task,
+    filtered_image_ids=None,
+    label=None,
+    value=None,
+):
+    path, pos = Config().read_path(), None
+    descriptor_type = DescriptorType(feature_model).descriptor_type
+    symantics_type = LatentSymanticsType(dimension_reduction).symantics_type
+
+    if DescriptorType(feature_model).check_sift():
+        x, ids, pos = process_files(
+            path, feature_model, dimension_reduction, filtered_image_ids
+        )
+    else:
+        x, ids = process_files(
+            path, feature_model, dimension_reduction, filtered_image_ids
+        )
+
+    latent_symantics_model, latent_symantics = LatentSymantics(
+        x, k, dimension_reduction
+    ).latent_symantics
+
+    records = set_records(
+        ids,
+        descriptor_type,
+        symantics_type,
+        k,
+        latent_symantics,
+        pos,
+        task,
+        label,
+        value,
+    )
+
+    Database().insert_many(records)
+
+    return latent_symantics_model, latent_symantics
 
 
 def sift_distance(source_vector, target_vector):
@@ -120,7 +176,6 @@ def cm_distance(source_vector, target_vector):
         )
 
     return distance.euclidean(weighted_source_vector, weighted_dest_vector)
-
 
 
 def distance_to_similarity(distances):
@@ -213,14 +268,10 @@ def subject_similarity(source_subject, other_subjects, k=1, choice=1):
         }
     """
     distances = []
-    source_latent_symantics = concatenate_latent_symantics(
-        source_subject, k, choice
-    )
+    source_latent_symantics = concatenate_latent_symantics(source_subject, k, choice)
 
     for subject in other_subjects:
-        other_latent_symantics = concatenate_latent_symantics(
-            subject, k, choice
-        )
+        other_latent_symantics = concatenate_latent_symantics(subject, k, choice)
 
         dist = distance.cosine(source_latent_symantics, other_latent_symantics)
         distances.append([subject["subject_id"], dist])

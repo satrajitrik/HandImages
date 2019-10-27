@@ -2,6 +2,8 @@ import cv2
 import numpy as np
 import skimage.feature as sk_feature
 import skimage.transform as sk_transform
+
+from latentsymantics import LatentSymanticsType
 from scipy.stats import skew
 from skimage.feature import local_binary_pattern
 
@@ -27,8 +29,9 @@ class DescriptorType(object):
 
 
 class Descriptor(object):
-    def __init__(self, image, feature_model):
+    def __init__(self, image, feature_model, dimension_reduction):
         self.image = image
+        self.dimension_reduction = dimension_reduction
         self.feature_descriptor = self._feature_descriptor(feature_model)
 
     """
@@ -164,10 +167,16 @@ class Descriptor(object):
                         ]
                     )
                 )
-                # Add the minimum (-ve value) to the skew to make it positive for NMF compatibility
-                skewOfY.append(np.add(skew(arr_y.flatten()), min_skew))
-                skewofU.append(np.add(skew(arr_u.flatten()), min_skew))
-                skewofV.append(np.add(skew(arr_v.flatten()), min_skew))
+
+                if LatentSymanticsType(self.dimension_reduction).check_nmf_lda():
+                    # Add the minimum (-ve value) to the skew to make it positive for NMF/LDA compatibility
+                    skewOfY.append(np.add(skew(arr_y.flatten()), min_skew))
+                    skewofU.append(np.add(skew(arr_u.flatten()), min_skew))
+                    skewofV.append(np.add(skew(arr_v.flatten()), min_skew))
+                else:
+                    skewOfY.append(skew(arr_y.flatten()))
+                    skewofU.append(skew(arr_u.flatten()))
+                    skewofV.append(skew(arr_v.flatten()))
 
         color_feature_vector = np.concatenate(
             [meanOfY, meanofU, meanofV, sdOfY, sdofU, sdofV, skewOfY, skewofU, skewofV],

@@ -11,9 +11,9 @@ def starter(feature_model, dimension_reduction, k, visualizer):
     path, pos = Config().read_path(), None
     descriptor_type = DescriptorType(feature_model).descriptor_type
     if DescriptorType(feature_model).check_sift():
-        x, ids, pos = functions.process_files(path, feature_model)
+        x, ids, pos = functions.process_files(path, feature_model, dimension_reduction)
     else:
-        x, ids = functions.process_files(path, feature_model)
+        x, ids = functions.process_files(path, feature_model, dimension_reduction)
 
     symantics_type = LatentSymanticsType(dimension_reduction).symantics_type
     if visualizer == 1:

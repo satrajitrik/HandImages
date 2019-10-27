@@ -92,11 +92,11 @@ def insert_subjects_metadata_to_db(database, metadata, feature_model=1):
         )
 
         dorsal_image_vectors, _ = functions.process_files(
-            Config().read_all_path(), feature_model, dorsal
+            Config().read_all_path(), feature_model, 1, dorsal
         )
         print("For subject {}: Completed reading dorsal images... ".format(subject_id))
         palmar_image_vectors, _ = functions.process_files(
-            Config().read_all_path(), feature_model, palmar
+            Config().read_all_path(), feature_model, 1, palmar
         )
         print("For subject {}: Completed reading palmar images... ".format(subject_id))
 
@@ -131,7 +131,9 @@ def insert_subject_similarities_to_db(database):
         source_subject, other_subjects = Database().retrieve_subjects(subject_id)
         similarity_values = [
             similarity
-            for _, similarity in functions.subject_similarity(source_subject, other_subjects)
+            for _, similarity in functions.subject_similarity(
+                source_subject, other_subjects
+            )
         ]
         output = collection.insert_one(
             {"subject_id": subject_id, "similarity_values": similarity_values}
