@@ -13,11 +13,12 @@ from pymongo import MongoClient
 from scipy.spatial import distance
 
 from config import Config
+from database import Database
 from descriptor import Descriptor, DescriptorType
-from latentsymantics import LatentSymantics
+from latentsymantics import LatentSymantics, LatentSymanticsType
 
 
-def process_files(path, feature_model, filtered_image_ids=None):
+def process_files(path, feature_model, dimension_reduction, filtered_image_ids=None):
     files = os.listdir(path)
 
     ids, x = [], []
@@ -28,7 +29,9 @@ def process_files(path, feature_model, filtered_image_ids=None):
             print("Reading file: {}".format(file))
             image = cv2.imread("{}{}".format(path, file))
 
-            feature_descriptor = Descriptor(image, feature_model).feature_descriptor
+            feature_descriptor = Descriptor(
+                image, feature_model, dimension_reduction
+            ).feature_descriptor
             ids.append(file.replace(".jpg", ""))
             x.append(feature_descriptor)
 
@@ -51,7 +54,17 @@ def process_files(path, feature_model, filtered_image_ids=None):
     return np.array(x), ids
 
 
-def set_records(ids, descriptor_type, symantics_type, k, latent_symantics, pos):
+def set_records(
+    ids,
+    descriptor_type,
+    symantics_type,
+    k,
+    latent_symantics,
+    pos,
+    task,
+    label=None,
+    value=None,
+):
     records = []
     f, prev_start = 1 if pos else 0, 0
 
@@ -60,6 +73,7 @@ def set_records(ids, descriptor_type, symantics_type, k, latent_symantics, pos):
             "image_id": ids[i],
             "descriptor_type": descriptor_type,
             "symantics_type": symantics_type,
+            "task": task,
             "k": k,
             "male": -1,
             "dorsal": -1,
@@ -80,12 +94,54 @@ def set_records(ids, descriptor_type, symantics_type, k, latent_symantics, pos):
             record["latent_symantics"] = latent_symantics[i].tolist()
         records.append(record)
 
+    if label:
+        for record in records:
+            record[label] = value
+
     return records
 
 
-"""
-    Similarity method for SIFT. To be updated. Gives okayish results.
-"""
+def store_in_db(
+    feature_model,
+    dimension_reduction,
+    k,
+    task,
+    filtered_image_ids=None,
+    label=None,
+    value=None,
+):
+    path, pos = Config().read_path(), None
+    descriptor_type = DescriptorType(feature_model).descriptor_type
+    symantics_type = LatentSymanticsType(dimension_reduction).symantics_type
+
+    if DescriptorType(feature_model).check_sift():
+        x, ids, pos = process_files(
+            path, feature_model, dimension_reduction, filtered_image_ids
+        )
+    else:
+        x, ids = process_files(
+            path, feature_model, dimension_reduction, filtered_image_ids
+        )
+
+    latent_symantics_model, latent_symantics = LatentSymantics(
+        x, k, dimension_reduction
+    ).latent_symantics
+
+    records = set_records(
+        ids,
+        descriptor_type,
+        symantics_type,
+        k,
+        latent_symantics,
+        pos,
+        task,
+        label,
+        value,
+    )
+
+    Database().insert_many(records)
+
+    return latent_symantics_model, latent_symantics
 
 
 def sift_distance(source_vector, target_vector):
@@ -120,11 +176,6 @@ def cm_distance(source_vector, target_vector):
         )
 
     return distance.euclidean(weighted_source_vector, weighted_dest_vector)
-
-
-"""
-    Might cause an issue
-"""
 
 
 def distance_to_similarity(distances):
@@ -163,11 +214,6 @@ def compare(source, targets, m, descriptor_type):
     ]
 
 
-"""
-    NOTE: If using LBP, use GridFS over here to extract vectors
-"""
-
-
 def concatenate_latent_symantics(subject, k, choice):
     connection = MongoClient(Config().mongo_url())
     database = connection[Config().database_name()]
@@ -196,3 +242,39 @@ def concatenate_latent_symantics(subject, k, choice):
     return np.concatenate(
         (np.array(dorsal_latent_symantics), np.array(palmar_latent_symantics))
     )
+
+
+def subject_similarity(source_subject, other_subjects, k=1, choice=1):
+    """
+        Idea is to extract all dorsal and palmar feature descriptors for a given subject.
+    
+        Dorsal/Palmar feature vectors are represented as numpy arrays of the form 
+        ((# of dorsal/palmar images for a subject) X (feature descriptor length)) 
+        where the # of rows is variable but the # of columns is constant for a given feature descriptor.
+        We take the transpose of these feature vector matrices to represent all dorsal/palmar images 
+        as features instead of objects for a given subject and apply dimensionality reduction 
+        to reduce the number of features to 1 feature/image which best represents the subject. 
+        After applying dimensionality reduction, we get 1 dorsal latent symantics matrix and 1 
+        palmar latent symantics matrix. The shape of these matrices are same. ie. (1 X (feature descriptor length))
+        We now concatenate the dorsal and palmar latent symantics and apply cosime similarity to
+        compare two subjects to get the result.
+        Parameters:
+        k = 1 (Reduced dimension)
+        choice: {
+	        1: PCA,
+	        2: SVD,
+	        3: NMF,
+	        4: LDA
+        }
+    """
+    distances = []
+    source_latent_symantics = concatenate_latent_symantics(source_subject, k, choice)
+
+    for subject in other_subjects:
+        other_latent_symantics = concatenate_latent_symantics(subject, k, choice)
+
+        dist = distance.cosine(source_latent_symantics, other_latent_symantics)
+        distances.append([subject["subject_id"], dist])
+
+    distances.append([source_subject["subject_id"], 0])
+    return sorted(distance_to_similarity(distances), key=lambda x: x[0])

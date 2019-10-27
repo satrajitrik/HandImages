@@ -14,12 +14,10 @@ def findlabel(feature_model, dimension_reduction, k, label_choice, image_id):
     symantics_type = LatentSymanticsType(dimension_reduction).symantics_type
     label, value, complementary_value = Labels(label_choice).label
 
-    source = Database().retrieve_one(image_id, descriptor_type, symantics_type, k)
-    label_targets = Database().retrieve_many(
-        descriptor_type, symantics_type, k, label, value
-    )
+    source = Database().retrieve_one(image_id, 5)
+    label_targets = Database().retrieve_many(5, label, value)
     complementary_label_targets = Database().retrieve_many(
-        descriptor_type, symantics_type, k, label, complementary_value
+        5, label, complementary_value
     )
 
     label_similarity_info = functions.compare(source, label_targets, 1, descriptor_type)
@@ -42,7 +40,9 @@ def helper(feature_model, dimension_reduction, k, label_choice, image_id):
     label, value, complementary_value = Labels(label_choice).label
 
     image = cv2.imread("{}{}{}".format(Config().read_all_path(), image_id, ".jpg"))
-    image_feature_vector = Descriptor(image, feature_model).feature_descriptor
+    image_feature_vector = Descriptor(
+        image, feature_model, dimension_reduction
+    ).feature_descriptor
 
     label_filtered_image_ids = [
         item["image_id"]
@@ -55,10 +55,13 @@ def helper(feature_model, dimension_reduction, k, label_choice, image_id):
 
     if DescriptorType(feature_model).check_sift():
         label_feature_vector, label_ids, label_pos = functions.process_files(
-            path, feature_model, label_filtered_image_ids
+            path, feature_model, dimension_reduction, label_filtered_image_ids
         )
         complementary_label_feature_vector, complementary_label_ids, complementary_label_pos = functions.process_files(
-            path, feature_model, complementary_label_filtered_image_ids
+            path,
+            feature_model,
+            dimension_reduction,
+            complementary_label_filtered_image_ids,
         )
         feature_vector = np.concatenate(
             (
@@ -70,10 +73,13 @@ def helper(feature_model, dimension_reduction, k, label_choice, image_id):
         pos = label_pos + complementary_label_pos + [image_feature_vector.shape[0]]
     else:
         label_feature_vector, label_ids = functions.process_files(
-            path, feature_model, label_filtered_image_ids
+            path, feature_model, dimension_reduction, label_filtered_image_ids
         )
         complementary_label_feature_vector, complementary_label_ids = functions.process_files(
-            path, feature_model, complementary_label_filtered_image_ids
+            path,
+            feature_model,
+            dimension_reduction,
+            complementary_label_filtered_image_ids,
         )
         feature_vector = np.concatenate(
             (
@@ -90,12 +96,12 @@ def helper(feature_model, dimension_reduction, k, label_choice, image_id):
     ).latent_symantics
 
     records = functions.set_records(
-        ids, descriptor_type, symantics_type, k, latent_symantics, pos
+        ids, descriptor_type, symantics_type, k, latent_symantics, pos, 5
     )
 
     for record in records:
         if record["image_id"] == image_id:
-            record[label] = -1
+            continue
         elif record["image_id"] in label_ids:
             record[label] = value
         elif record["image_id"] in complementary_label_ids:

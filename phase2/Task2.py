@@ -2,16 +2,18 @@ import functions
 
 from database import Database
 from descriptor import DescriptorType
-from latentsymantics import LatentSymanticsType
 
 
 def starter(feature_model, dimension_reduction, k, image_id, m):
-    descriptor_type = DescriptorType(feature_model).descriptor_type
-    symantics_type = LatentSymanticsType(dimension_reduction).symantics_type
+    if not feature_model:
+        target_results = Database().retrieve_many(task=1)
+        source_result = Database().retrieve_one(image_id, task=1)
+        descriptor_type = source_result["descriptor_type"]
+    else:
+        _, _ = functions.store_in_db(feature_model, dimension_reduction, k, 2)
 
-    target_results = Database().retrieve_many(descriptor_type, symantics_type, k)
-    source_result = Database().retrieve_one(
-        image_id, descriptor_type, symantics_type, k
-    )
+        target_results = Database().retrieve_many(task=2)
+        source_result = Database().retrieve_one(image_id, task=2)
+        descriptor_type = source_result["descriptor_type"]
 
     print(functions.compare(source_result, target_results, m, descriptor_type))
