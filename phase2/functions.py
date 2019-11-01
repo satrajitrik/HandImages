@@ -190,13 +190,14 @@ def compare(source, targets, m, descriptor_type):
     ]
 
     distances = []
-    for target in targets:
+    for i, target in enumerate(targets):
         image_distance_info = [target["image_id"]]
 
         if descriptor_type == "sift":
             image_distance_info.append(
                 sift_distance(source["latent_symantics"], target["latent_symantics"])
             )
+            print("Comparing SIFT vectors: Completed {} %".format(float(i+1)*100/len(targets)))
         elif descriptor_type == "cm":
             image_distance_info.append(
                 cm_distance(source["latent_symantics"], target["latent_symantics"])
