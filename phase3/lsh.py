@@ -15,19 +15,25 @@ class HashTable(object):
     def __generate_random_vectors(self):
         random_vectors = []
         for _ in range(self.num_of_hashes):
-            rv = np.random.randint(2, size=self.dimensions)
+            rv = np.random.normal(0, 1, size=self.dimensions)
             norm = np.linalg.norm(rv)
             random_vectors.append(rv / norm)
 
         return np.array(random_vectors)
 
     def __populate_hash_table(self):
-        hash_table = defaultdict(list)
+        """
+            Follows Euclidean family of LSH.
+            w value to change with input vectors.
+            Hash implementation might change.
+        """
+        hash_table, w = defaultdict(list), 400
         random_vectors = self.__generate_random_vectors()
 
         for i, iv in enumerate(self.input_vector):
-            dot_product = np.dot(random_vectors, np.transpose(iv))
-            hash = "".join(["1" if dp > 0 else "0" for dp in dot_product])
+            dot_product = np.dot(iv, np.transpose(random_vectors))
+            sums = np.add(dot_product, np.random.uniform(0, w)) / w
+            hash = "".join([str(abs(int(round(h)))) for h in sums])
             hash_table[hash].append(i)
 
         return hash_table
