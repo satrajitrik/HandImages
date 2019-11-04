@@ -45,9 +45,9 @@ class LSH(object):
 
     def beautify_and_print(self):
         """
-		    Helper function to visualize the l hashtables.
-		    Only to be used for visualization.
-		"""
+            Helper function to visualize the l hashtables.
+            Only to be used for visualization.
+        """
         hash_tables = self.__create_hash_tables()
 
         for hash_table in hash_tables:
