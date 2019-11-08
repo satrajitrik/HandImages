@@ -1,3 +1,4 @@
+import math
 import numpy as np
 import pandas as pd
 
@@ -9,7 +10,7 @@ class HashTable(object):
     def __init__(self, num_of_hashes, input_vector):
         self.num_of_hashes = num_of_hashes
         self.input_vector = input_vector
-        self.dimensions = 200
+        self.dimensions = len((input_vector[0])[1])
         self.hash_table = self.__populate_hash_table()
 
     def __generate_random_vectors(self):
@@ -27,13 +28,13 @@ class HashTable(object):
             w value to change with input vectors.
             Hash implementation might change.
         """
-        hash_table, w = defaultdict(list), 75
+        hash_table, w = defaultdict(list), 20
         random_vectors = self.__generate_random_vectors()
 
         for id, iv in self.input_vector:
             dot_product = np.dot(iv, np.transpose(random_vectors))
             sums = np.add(dot_product, np.random.uniform(0, w)) / w
-            hash = "".join([str(abs(int(round(h)))) for h in sums])
+            hash = "_".join([str(math.floor(h)) for h in sums])
             hash_table[hash].append(id)
 
         return hash_table

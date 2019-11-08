@@ -9,9 +9,9 @@ from config import Config
 
 
 class ImageProcessor(object):
-    def __init__(self):
-        self.read_path = Config().read_path()
-        self.k = 200
+    def __init__(self, filtered_image_ids = None):
+        self.read_path = Config().read_all_path() if filtered_image_ids else Config().read_path()
+        self.filtered_image_ids = filtered_image_ids
         self.id_vector_pair = self.__process_files()
 
     def __process_files(self):
@@ -19,17 +19,18 @@ class ImageProcessor(object):
 
         ids, x = [], []
         for file in files:
-            print("Reading file: {}".format(file))
-            image = cv2.imread("{}{}".format(self.read_path, file))
+            if not self.filtered_image_ids or (
+                self.filtered_image_ids and file.replace(".jpg", "") in self.filtered_image_ids
+            ):
+                print("Reading file: {}".format(file))
+                image = cv2.imread("{}{}".format(self.read_path, file))
 
-            feature_descriptor = self.__color_moments(image)
+                feature_descriptor = self.__color_moments(image)
 
-            ids.append(file.replace(".jpg", ""))
-            x.append(feature_descriptor)
+                ids.append(file.replace(".jpg", ""))
+                x.append(feature_descriptor)
 
-        latent_semantics = self.__svd(np.array(x), self.k)
-
-        return ids, latent_semantics
+        return ids, x
 
     def __color_moments(self, image):
         img_out = cv2.cvtColor(image, cv2.COLOR_BGR2YUV)
@@ -91,6 +92,3 @@ class ImageProcessor(object):
             axis=0,
         )
         return color_moment_feature_vector
-
-    def __svd(self, x, k):
-        return TruncatedSVD(n_components=self.k).fit_transform(x)
