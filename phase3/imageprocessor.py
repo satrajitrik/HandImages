@@ -9,8 +9,10 @@ from config import Config
 
 
 class ImageProcessor(object):
-    def __init__(self, filtered_image_ids = None):
-        self.read_path = Config().read_all_path() if filtered_image_ids else Config().read_path()
+    def __init__(self, filtered_image_ids=None):
+        self.read_path = (
+            Config().read_all_path() if filtered_image_ids else Config().read_path()
+        )
         self.filtered_image_ids = filtered_image_ids
         self.id_vector_pair = self.__process_files()
 
@@ -20,7 +22,8 @@ class ImageProcessor(object):
         ids, x = [], []
         for file in files:
             if not self.filtered_image_ids or (
-                self.filtered_image_ids and file.replace(".jpg", "") in self.filtered_image_ids
+                self.filtered_image_ids
+                and file.replace(".jpg", "") in self.filtered_image_ids
             ):
                 print("Reading file: {}".format(file))
                 image = cv2.imread("{}{}".format(self.read_path, file))
