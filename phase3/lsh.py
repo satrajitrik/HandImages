@@ -28,14 +28,14 @@ class HashTable(object):
         w value to change with input vectors.
         Hash implementation might change.
         """
-        hash_table, w = defaultdict(list), 30
+        hash_table, w = defaultdict(set), 30
         random_vectors = self.__generate_random_vectors()
 
         for id, iv in self.input_vector:
             dot_product = np.dot(iv, np.transpose(random_vectors))
             sums = np.add(dot_product, np.random.uniform(0, w)) / w
             hash = "".join(["0" if h < 0 else "1" for h in sums])
-            hash_table[hash].append(id)
+            hash_table[hash].add(id)
 
         return hash_table
 
@@ -66,14 +66,17 @@ class LSH(object):
 
     def get_search_results(self, image_id, show=False):
         hash_tables = self.hash_tables
+
         if show:
             self.__beautify_and_print(hash_tables)
 
-        search_results = [
-            hash_table[hash]
-            for hash_table in hash_tables
-            for hash in hash_table
-            if image_id in hash_table[hash]
-        ]
+        search_results = set.union(
+            *[
+                hash_table[hash]
+                for hash_table in hash_tables
+                for hash in hash_table
+                if image_id in hash_table[hash]
+            ]
+        )
 
-        return set([id for result in search_results for id in result]) - set([image_id])
+        return search_results - set([image_id])

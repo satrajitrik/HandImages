@@ -10,7 +10,7 @@ from lsh import LSH
 def starter(image_id, m):
     id_vector_pairs = Database().retrieve_many()
 
-    search_results = LSH(6, 6, id_vector_pairs).get_search_results(image_id, show=True)
+    search_results = LSH(6, 6, id_vector_pairs).get_search_results(image_id)
 
     print(
         "Original dataset size: {} | Reduced search space size: {} | Reduction by {} %".format(
