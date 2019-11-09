@@ -1,26 +1,47 @@
+import functions
 import numpy as np
+import pandas as pd
+import visualizer
 
 from database import Database
 from imageprocessor import ImageProcessor
 from lsh import LSH
+from tabulate import tabulate
 
 
-def starter():
+def beautify_and_print(hash_tables):
+    """
+    Helper function to visualize the l hashtables.
+    Only to be used for visualization.
+    """
+    for hash_table in hash_tables:
+        print(
+            tabulate(
+                pd.DataFrame(list(hash_table.items())),
+                headers=["Hash", "Image IDs"],
+                showindex=False,
+            )
+        )
+
+
+def starter(image_id, m):
     id_vector_pairs = Database().retrieve_many()
 
-    # Displaying the 5 hashtables
-    target_hash_tables = LSH(10, 3, id_vector_pairs).hash_tables
+    search_results = LSH(6, 6, id_vector_pairs).get_search_results(image_id)
 
-    source_id, source_vector = ImageProcessor(["Hand_0011744"]).id_vector_pair
-    source_id_vector_pair = [
-        (source_id[i], source_vector[i]) for i in range(len(source_id))
-    ]
+    print(
+        "Original dataset size: {} | Reduced search space size: {} | Reduction by {} %".format(
+            len(id_vector_pairs),
+            len(search_results),
+            float(len(id_vector_pairs) - len(search_results))
+            * 100
+            / len(id_vector_pairs),
+        )
+    )
+    search_id_vector_pairs = Database().retrieve_many(list(search_results))
+    source_vector = Database().retrieve_one(image_id)["vector"]
 
-    source_hash_tables = LSH(40, 3, source_id_vector_pair).hash_tables
+    similar_images = functions.find_similarity(source_vector, search_id_vector_pairs, m)
+    print(similar_images)
 
-    for hash_table in source_hash_tables:
-        keys = hash_table.keys()
-        for key in keys:
-            for target_hash_table in target_hash_tables:
-                if key in target_hash_table:
-                    print(target_hash_table[key])
+    visualizer.visualize_lsh(image_id, similar_images)

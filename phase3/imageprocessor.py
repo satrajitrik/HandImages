@@ -1,19 +1,17 @@
 import cv2
 import numpy as np
 import os
-
-from scipy.stats import skew
-from sklearn.decomposition import TruncatedSVD
+import skimage.feature as sk_feature
+import skimage.transform as sk_transform
 
 from config import Config
+from scipy.stats import skew
+from sklearn.decomposition import PCA
 
 
 class ImageProcessor(object):
-    def __init__(self, filtered_image_ids=None):
-        self.read_path = (
-            Config().read_all_path() if filtered_image_ids else Config().read_path()
-        )
-        self.filtered_image_ids = filtered_image_ids
+    def __init__(self):
+        self.read_path = Config().read_path()
         self.id_vector_pair = self.__process_files()
 
     def __process_files(self):
@@ -21,19 +19,33 @@ class ImageProcessor(object):
 
         ids, x = [], []
         for file in files:
-            if not self.filtered_image_ids or (
-                self.filtered_image_ids
-                and file.replace(".jpg", "") in self.filtered_image_ids
-            ):
-                print("Reading file: {}".format(file))
-                image = cv2.imread("{}{}".format(self.read_path, file))
+            print("Reading file: {}".format(file))
+            image = cv2.imread("{}{}".format(self.read_path, file))
 
-                feature_descriptor = self.__color_moments(image)
+            feature_descriptor = self.__color_moments(image)
 
-                ids.append(file.replace(".jpg", ""))
-                x.append(feature_descriptor)
+            ids.append(file.replace(".jpg", ""))
+            x.append(feature_descriptor)
 
-        return ids, x
+        latent_semantics = self.__pca(x)
+
+        return ids, latent_semantics
+
+    def __hog(self, image):
+        scaled_image = sk_transform.rescale(
+            image, 0.1, anti_aliasing=True
+        )  # Anti-aliasing applies gaussian filter
+        hog_feature_vector, hog_image = sk_feature.hog(
+            scaled_image,
+            orientations=9,
+            pixels_per_cell=(8, 8),
+            cells_per_block=(2, 2),
+            block_norm="L2-Hys",
+            visualize=True,
+            feature_vector=True,
+            multichannel=True,
+        )
+        return hog_feature_vector
 
     def __color_moments(self, image):
         img_out = cv2.cvtColor(image, cv2.COLOR_BGR2YUV)
@@ -95,3 +107,7 @@ class ImageProcessor(object):
             axis=0,
         )
         return color_moment_feature_vector
+
+    def __pca(self, x):
+        k = min(256, len(x))
+        return PCA(n_components=k).fit_transform(x)

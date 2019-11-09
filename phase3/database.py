@@ -30,12 +30,25 @@ class Database(object):
 
         print("Successfully inserted into DB... ")
 
-    def retrieve_many(self):
+    def retrieve_many(self, image_ids=None):
         connection = self.__open_connection()
         database = connection[self.database_name]
         collection = database[self.collection_name]
 
-        query_results = collection.find({})
+        if image_ids:
+            query_results = collection.find({"id": {"$in": image_ids}})
+        else:
+            query_results = collection.find({})
         connection.close()
 
         return [(item["id"], item["vector"]) for item in query_results]
+
+    def retrieve_one(self, image_id):
+        connection = self.__open_connection()
+        database = connection[self.database_name]
+        collection = database[self.collection_name]
+
+        query_result = collection.find_one({"id": image_id})
+        connection.close()
+
+        return query_result
