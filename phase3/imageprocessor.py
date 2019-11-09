@@ -31,22 +31,6 @@ class ImageProcessor(object):
 
         return ids, latent_semantics
 
-    def __hog(self, image):
-        scaled_image = sk_transform.rescale(
-            image, 0.1, anti_aliasing=True
-        )  # Anti-aliasing applies gaussian filter
-        hog_feature_vector, hog_image = sk_feature.hog(
-            scaled_image,
-            orientations=9,
-            pixels_per_cell=(8, 8),
-            cells_per_block=(2, 2),
-            block_norm="L2-Hys",
-            visualize=True,
-            feature_vector=True,
-            multichannel=True,
-        )
-        return hog_feature_vector
-
     def __color_moments(self, image):
         img_out = cv2.cvtColor(image, cv2.COLOR_BGR2YUV)
         # Saving height, width, and channel  of a given image

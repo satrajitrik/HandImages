@@ -1,7 +1,9 @@
 import math
 import numpy as np
+import pandas as pd
 
 from collections import defaultdict
+from tabulate import tabulate
 
 
 class HashTable(object):
@@ -48,10 +50,28 @@ class LSH(object):
     def __create_hash_tables(self):
         return [HashTable(self.k, self.input_vector).hash_table for _ in range(self.l)]
 
-    def get_search_results(self, image_id):
+    def __beautify_and_print(self, hash_tables):
+        """
+        Helper function to visualize the l hashtables.
+        Only to be used for visualization.
+        """
+        for hash_table in hash_tables:
+            print(
+                tabulate(
+                    pd.DataFrame(list(hash_table.items())),
+                    headers=["Hash", "Image IDs"],
+                    showindex=False,
+                )
+            )
+
+    def get_search_results(self, image_id, show=False):
+        hash_tables = self.hash_tables
+        if show:
+            self.__beautify_and_print(hash_tables)
+
         search_results = [
             hash_table[hash]
-            for hash_table in self.hash_tables
+            for hash_table in hash_tables
             for hash in hash_table
             if image_id in hash_table[hash]
         ]
