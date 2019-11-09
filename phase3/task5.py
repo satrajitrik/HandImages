@@ -1,33 +1,16 @@
 import functions
 import numpy as np
-import pandas as pd
 import visualizer
 
 from database import Database
 from imageprocessor import ImageProcessor
 from lsh import LSH
-from tabulate import tabulate
-
-
-def beautify_and_print(hash_tables):
-    """
-    Helper function to visualize the l hashtables.
-    Only to be used for visualization.
-    """
-    for hash_table in hash_tables:
-        print(
-            tabulate(
-                pd.DataFrame(list(hash_table.items())),
-                headers=["Hash", "Image IDs"],
-                showindex=False,
-            )
-        )
 
 
 def starter(image_id, m):
     id_vector_pairs = Database().retrieve_many()
 
-    search_results = LSH(6, 6, id_vector_pairs).get_search_results(image_id)
+    search_results = LSH(6, 6, id_vector_pairs).get_search_results(image_id, show=True)
 
     print(
         "Original dataset size: {} | Reduced search space size: {} | Reduction by {} %".format(
