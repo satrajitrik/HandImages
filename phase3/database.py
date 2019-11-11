@@ -1,5 +1,5 @@
 import traceback
-
+import pandas as pd
 from config import Config
 from pymongo import MongoClient
 
@@ -19,10 +19,15 @@ class Database(object):
             print("Connection refused... ")
         return None
 
-    def insert_many(self, records):
+    def insert_many(self, records, collection_type = None):
         connection = self.__open_connection()
         database = connection[self.database_name]
         collection = database[self.collection_name]
+
+        if collection_type == "training" :
+            collection = database[Config().training_collection_name()]
+        if collection_type == "testing":
+            collection = database[Config().testing_collection_name()]
 
         collection.drop()
         collection.insert_many(records)
@@ -30,10 +35,17 @@ class Database(object):
 
         print("Successfully inserted into DB... ")
 
-    def retrieve_many(self, image_ids=None):
+    def retrieve_many(self, image_ids=None, collection_type = None):
         connection = self.__open_connection()
         database = connection[self.database_name]
         collection = database[self.collection_name]
+
+
+        if collection_type == "training" :
+            collection = database[Config().training_collection_name()]
+        if collection_type == "testing":
+            collection = database[Config().testing_collection_name()]
+
 
         if image_ids:
             query_results = collection.find({"id": {"$in": image_ids}})
@@ -41,7 +53,13 @@ class Database(object):
             query_results = collection.find({})
         connection.close()
 
+        if collection_type != None :
+            return pd.DataFrame(list(query_results))
+
+
         return [(item["id"], item["vector"]) for item in query_results]
+
+
 
     def retrieve_one(self, image_id):
         connection = self.__open_connection()
