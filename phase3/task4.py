@@ -1,7 +1,7 @@
-from DecisionTreeClassifier import DecisionTreeClassifier as dt
+from decisiontreeclassifier import DecisionTreeClassifier as dt
 from database import Database
 from config import Config
-from visualizer import Visualizer
+import visualizer
 import pandas
 import numpy as np
 
@@ -45,4 +45,4 @@ def starter():
     print("Incorrectly classified : ", (m - correct))
     print("accuracy : " , (correct * 1.0)/(m * 1.0))
 
-    Visualizer.task4visualizar(images,y)
+    visualizer.task4visualizar(images,y)
