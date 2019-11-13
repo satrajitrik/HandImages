@@ -1,7 +1,6 @@
-from database import Database
 from imageprocessor import ImageProcessor
 from config import Config
-from pymongo import MongoClient
+
 from descriptor import Descriptor, DescriptorType
 from latentsymantics import LatentSymantics, LatentSymanticsType
 from database import Database
@@ -85,9 +84,6 @@ def insert_image_in_database(path,feature_model,dimension_reduction,k,training,m
 
 if __name__ == "__main__":
     preprocess_images()
-
-    connection = MongoClient(Config().mongo_url())
-    database = connection[Config().database_name()]
     metadata = pandas.read_csv(Config().metadata_file())
 
     # store training folder

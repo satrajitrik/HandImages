@@ -1,6 +1,6 @@
 import numpy as np
 
-class decisionTreeClassifier:
+class DecisionTreeClassifier:
 
     #Initialization
     def __init__(self, max_depth=None):
