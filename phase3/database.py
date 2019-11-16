@@ -1,4 +1,5 @@
 import traceback
+import pandas as pd
 
 from config import Config
 from pymongo import MongoClient
@@ -19,10 +20,21 @@ class Database(object):
             print("Connection refused... ")
         return None
 
-    def insert_many(self, records):
+    def insert_many(self, records, collection_type=None):
+        """
+        :param records: List of records to insert
+        :param collection_type (Optional): training - insert into hands_train, testing - insert into hands_test, null - insert into hands
+        :return None
+        """
         connection = self.__open_connection()
         database = connection[self.database_name]
-        collection = database[self.collection_name]
+
+        if collection_type == "training":
+            collection = database[Config().training_collection_name()]
+        elif collection_type == "testing":
+            collection = database[Config().testing_collection_name()]
+        else:
+            collection = database[self.collection_name]
 
         collection.drop()
         collection.insert_many(records)
@@ -30,10 +42,21 @@ class Database(object):
 
         print("Successfully inserted into DB... ")
 
-    def retrieve_many(self, image_ids=None):
+    def retrieve_many(self, image_ids=None, collection_type=None):
+        """
+        :param image_ids (Optional): List of image IDs as a filter while querying
+        :param collection_type (Optional): training - query from hands_train, testing - query from hands_test, null - query from hands
+        :return list(hash)
+        """
         connection = self.__open_connection()
         database = connection[self.database_name]
-        collection = database[self.collection_name]
+
+        if collection_type == "training":
+            collection = database[Config().training_collection_name()]
+        elif collection_type == "testing":
+            collection = database[Config().testing_collection_name()]
+        else:
+            collection = database[self.collection_name]
 
         if image_ids:
             query_results = collection.find({"id": {"$in": image_ids}})
@@ -41,7 +64,7 @@ class Database(object):
             query_results = collection.find({})
         connection.close()
 
-        return [(item["id"], item["vector"]) for item in query_results]
+        return list(query_results)
 
     def retrieve_one(self, image_id):
         connection = self.__open_connection()
