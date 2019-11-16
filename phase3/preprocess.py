@@ -1,15 +1,11 @@
-from imageprocessor import ImageProcessor
-from config import Config
-
-from descriptor import Descriptor, DescriptorType
-from latentsymantics import LatentSymantics, LatentSymanticsType
-from database import Database
-
-
-import os
+import functions
 import numpy as np
-import pandas
-import cv2
+import os
+
+from config import Config
+from database import Database
+from latentsymantics import LatentSymantics
+from imageprocessor import ImageProcessor
 
 
 def preprocess_images():
@@ -20,76 +16,88 @@ def preprocess_images():
 
     Database().insert_many(records)
 
-def insert_image_in_database(path,feature_model,dimension_reduction,k,training,metadata=None):
-    descriptor_type = DescriptorType(feature_model).descriptor_type
-    symantics_type = LatentSymanticsType(dimension_reduction).symantics_type
 
-    #Read images and feature extraction
-    files = os.listdir(path)
-    ids, x = [], []
-    for file in files:
-        print("Reading file: {}".format(file))
-        image = cv2.imread("{}{}".format(path, file))
+def insert_images_in_database(
+    feature_model, dimension_reduction, k, identifier, set1_dir=True, set2_dir=True
+):
+    """
+    :param feature_model: 1 - CM, 2 - LBP, 3 - HOG, 4 - SIFT
+    :param dimension_reduction: 1 - PCA, 2 - SVD, 3 - NMF, 4 - LDA
+    :param k: reduced dimension value
+    :param identifier: 0 - Read all, 1 - Read from Labelled, 2 - Read from Unlabelled
+    :param set1_dir (Optional): True - Read from Set1 folder of Labelled/Unlabelled, False otherwise
+    :param set2_dir (Optional): True - Read from Set2 folder of Labelled/Unlabelled, False otherwise
+    :return None
 
-        feature_descriptor = Descriptor(
-            image, feature_model, dimension_reduction
-        ).feature_descriptor
-        ids.append(file.replace(".jpg", ""))
-        x.append(feature_descriptor)
-    x = np.array(x)
+    Default case: Read from both Set1 and Set2 folders
+    """
 
-
-    #Find Latent_symantics
-    latent_symantics_model, latent_symantics = LatentSymantics(
-        x, k, dimension_reduction
-    ).latent_symantics
-
-
-    #inserting data into Database
-    records = []
-    if training:
-        '''
-        dorsal = 1
-        palmar = 0
-        '''
-
-        for i in range(len(ids)):
-            imageName = ids[i] + ".jpg"
-            y = metadata[metadata.imageName == imageName]['aspectOfHand'].values
-            if(y== 'dorsal right' or y == "dorsal left"):
-                y = 1
-            else:
-                y = 0
-            record = {
-                "image_id": ids[i],
-                "latent_symantics" : latent_symantics[i].tolist(),
-                "symantics_type": symantics_type,
-                "descriptor_type": descriptor_type,
-                "label" : y
-            }
-            records.append(record)
-        Database().insert_many(records,collection_type = "training")
+    # Read images and feature extraction
+    if identifier == 0:
+        ids, x = functions.process_files(
+            Config().read_all_path(), feature_model, dimension_reduction
+        )
+    elif identifier == 1:
+        if set1_dir and set2_dir:
+            ids1, x1 = functions.process_files(
+                Config().read_training_set1_path(), feature_model, dimension_reduction
+            )
+            ids2, x2 = functions.process_files(
+                Config().read_training_set2_path(), feature_model, dimension_reduction
+            )
+            ids = ids1 + ids2
+            x = np.concatenate((x1, x2))
+        elif set1_dir:
+            ids, x = functions.process_files(
+                Config().read_training_set1_path(), feature_model, dimension_reduction
+            )
+        elif set2_dir:
+            ids, x = functions.process_files(
+                Config().read_training_set2_path(), feature_model, dimension_reduction
+            )
     else:
-        for i in range(len(ids)):
-            record = {
-                "image_id": ids[i],
-                "latent_symantics" : latent_symantics[i].tolist(),
-                "symantics_type": symantics_type,
-                "descriptor_type": descriptor_type,
-            }
-            records.append(record)
-        Database().insert_many(records,collection_type = "testing")
+        if set1_dir and set2_dir:
+            ids1, x1 = functions.process_files(
+                Config().read_testing_set1_path(), feature_model, dimension_reduction
+            )
+            ids2, x2 = functions.process_files(
+                Config().read_testing_set2_path(), feature_model, dimension_reduction
+            )
+            ids = ids1 + ids2
+            x = np.concatenate((x1, x2))
+        elif set1_dir:
+            ids, x = functions.process_files(
+                Config().read_testing_set1_path(), feature_model, dimension_reduction
+            )
+        elif set2_dir:
+            ids, x = functions.process_files(
+                Config().read_testing_set2_path(), feature_model, dimension_reduction
+            )
 
-    return
+    # Find Latent_symantics
+    _, latent_symantics = LatentSymantics(x, k, dimension_reduction).latent_symantics
+
+    # inserting data into Database
+    if identifier == 0:
+        records = functions.set_records(ids, latent_symantics)
+        Database().insert_many(records)
+    elif identifier == 1:
+        records = functions.set_records(ids, latent_symantics, training=True)
+        Database().insert_many(records, collection_type="training")
+    else:
+        records = functions.set_records(ids, latent_symantics)
+        Database().insert_many(records, collection_type="testing")
+
 
 if __name__ == "__main__":
-    preprocess_images()
-    metadata = pandas.read_csv(Config().metadata_file())
+    # preprocess_images()
 
     # store training folder
-    path = Config().read_training_data_path()
-    insert_image_in_database(path,1,1,50,True,metadata)
+    insert_images_in_database(
+        feature_model=1, dimension_reduction=1, k=50, identifier=1
+    )
 
     # store testing folder
-    path = Config().read_testing_data_path()
-    insert_image_in_database(path,1,1,50,False)
+    insert_images_in_database(
+        feature_model=1, dimension_reduction=1, k=50, identifier=2
+    )

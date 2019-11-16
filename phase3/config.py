@@ -12,33 +12,36 @@ class Config(object):
 
     def collection_name(self):
         return self.constants.get("COLLECTION_NAME")
+
     def training_collection_name(self):
         return self.constants.get("TRAINING_COLLECTION_NAME")
+
     def testing_collection_name(self):
         return self.constants.get("TESTING_COLLECTION_NAME")
 
     def mongo_url(self):
         return self.constants.get("MONGO_URL")
 
-    """
-        Reads all 11k images.
-    """
-
     def read_all_path(self):
+        """
+        Reads 11K images
+        """
         return self.constants.get("READ_ALL_PATH")
-
-    """
-        Reads 63 images.
-    """
 
     def read_path(self):
         return self.constants.get("READ_PATH")
 
-    def read_training_data_path(self):
-        return self.constants.get("READ_TRAINING_DATA_PATH")
+    def read_training_set1_path(self):
+        return self.constants.get("READ_TRAINING_SET1_PATH")
 
-    def read_testing_data_path(self):
-        return self.constants.get("READ_TESTING_DATA_PATH")
+    def read_training_set2_path(self):
+        return self.constants.get("READ_TRAINING_SET2_PATH")
+
+    def read_testing_set1_path(self):
+        return self.constants.get("READ_TESTING_SET1_PATH")
+
+    def read_testing_set2_path(self):
+        return self.constants.get("READ_TESTING_SET2_PATH")
 
     def write_path(self):
         return self.constants.get("WRITE_PATH")

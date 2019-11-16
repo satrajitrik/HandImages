@@ -26,26 +26,26 @@ def visualize_lsh(source_image_id, similar_images):
 
     plt.show()
 
-def task4visualizar(images,y):
+
+def visualize_task4(images, y):
     m = len(y)
     col = 6
-    if(m%col == 0):
-        row = int(m/col)
-    else:
-        row = int(m/col) + 1
+    row = int(m / col) if m % col == 0 else int(m / col) + 1
     fig, axes = plt.subplots(row, col)
     ax = axes.ravel()
     for i in range(m):
-        ax[i].imshow(plt.imread(Config().read_testing_data_path() + images[i] + ".jpg"),  interpolation='none')
-        if(y[i] == 1): l = "Dorsal"
-        else: l = "Palmar"
-        ax[i].set_title(l ,fontsize = 10)
+        ax[i].imshow(
+            plt.imread(Config().read_all_path() + images[i] + ".jpg"),
+            interpolation="none",
+        )
+        l = "Dorsal" if y[i] == 1 else "Palmar"
+        ax[i].set_title(l, fontsize=10)
         ax[i].xaxis.set_visible(False)
         ax[i].yaxis.set_visible(False)
 
-    for i in range(m,row*col):
+    for i in range(m, row * col):
         ax[i].xaxis.set_visible(False)
         ax[i].yaxis.set_visible(False)
 
-    fig.suptitle('Image Classification using Decision Tree')
+    fig.suptitle("Image Classification using Decision Tree")
     plt.show()
