@@ -1,20 +1,12 @@
+import cv2
 import functions
 import numpy as np
 import os
 
 from config import Config
 from database import Database
+from descriptor import Descriptor
 from latentsymantics import LatentSymantics
-from imageprocessor import ImageProcessor
-
-
-def preprocess_images():
-    ids, input_vector = ImageProcessor().id_vector_pair
-    records = [
-        {"id": ids[i], "vector": input_vector[i].tolist()} for i in range(len(ids))
-    ]
-
-    Database().insert_many(records)
 
 
 def insert_images_in_database(
@@ -34,9 +26,33 @@ def insert_images_in_database(
 
     # Read images and feature extraction
     if identifier == 0:
-        ids, x = functions.process_files(
-            Config().read_all_path(), feature_model, dimension_reduction
-        )
+        read_all_path = Config().read_all_path()
+        files = os.listdir(read_all_path)
+        connection = Database().open_connection()
+        db = connection[Config().database_name()]
+        collection = db[Config().collection_name()]
+
+        for i, file in enumerate(files):
+            print(
+                "Reading file: {} | {} % Done".format(
+                    file, ((i + 1) * 100.0) / len(files)
+                )
+            )
+            image = cv2.imread("{}{}".format(read_all_path, file))
+
+            feature_descriptor = Descriptor(
+                image, feature_model, dimension_reduction
+            ).feature_descriptor
+            image_id = file.replace(".jpg", "")
+            collection.insert_one(
+                {"image_id": image_id, "vector": feature_descriptor.tolist()}
+            )
+
+        connection.close()
+        query_results = Database().retrieve_many()
+        ids = [item["image_id"] for item in query_results]
+        x = np.array([item["vector"] for item in query_results])
+
     elif identifier == 1:
         if set1_dir and set2_dir:
             ids1, x1 = functions.process_files(
@@ -87,10 +103,13 @@ def insert_images_in_database(
     else:
         records = functions.set_records(ids, latent_symantics)
         Database().insert_many(records, collection_type="testing")
+    print("Done... ")
 
 
 if __name__ == "__main__":
-    # preprocess_images()
+    insert_images_in_database(
+        feature_model=1, dimension_reduction=1, k=256, identifier=0
+    )
 
     # store training folder
     insert_images_in_database(

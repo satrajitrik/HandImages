@@ -11,7 +11,7 @@ class Database(object):
         self.collection_name = Config().collection_name()
         self.mongo_url = Config().mongo_url()
 
-    def __open_connection(self):
+    def open_connection(self):
         try:
             connection = MongoClient(self.mongo_url)
             return connection
@@ -26,7 +26,7 @@ class Database(object):
         :param collection_type (Optional): training - insert into hands_train, testing - insert into hands_test, null - insert into hands
         :return None
         """
-        connection = self.__open_connection()
+        connection = self.open_connection()
         database = connection[self.database_name]
 
         if collection_type == "training":
@@ -48,7 +48,7 @@ class Database(object):
         :param collection_type (Optional): training - query from hands_train, testing - query from hands_test, null - query from hands
         :return list(hash)
         """
-        connection = self.__open_connection()
+        connection = self.open_connection()
         database = connection[self.database_name]
 
         if collection_type == "training":
@@ -59,7 +59,7 @@ class Database(object):
             collection = database[self.collection_name]
 
         if image_ids:
-            query_results = collection.find({"id": {"$in": image_ids}})
+            query_results = collection.find({"image_id": {"$in": image_ids}})
         else:
             query_results = collection.find({})
         connection.close()
@@ -67,11 +67,11 @@ class Database(object):
         return list(query_results)
 
     def retrieve_one(self, image_id):
-        connection = self.__open_connection()
+        connection = self.open_connection()
         database = connection[self.database_name]
         collection = database[self.collection_name]
 
-        query_result = collection.find_one({"id": image_id})
+        query_result = collection.find_one({"image_id": image_id})
         connection.close()
 
         return query_result
