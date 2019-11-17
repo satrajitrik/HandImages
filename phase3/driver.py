@@ -1,12 +1,13 @@
-import task5
-import task4
+from phase3 import task3, task4, task5
 
 
 def main():
     task = int(input("Input Task number:"))
-    if task == 4:
+    if task == 3:
+        task3.starter()
+    elif task == 4:
         task4.starter()
-    if task == 5:
+    elif task == 5:
         image_id = input("Enter the image ID: ")
         m = int(input("Enter m: "))
         k = int(input("Enter k: "))

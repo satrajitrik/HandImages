@@ -3,10 +3,10 @@ import functions
 import numpy as np
 import os
 
-from config import Config
-from database import Database
-from descriptor import Descriptor
-from latentsymantics import LatentSymantics
+from phase3.config import Config
+from phase3.database import Database
+from phase3.descriptor import Descriptor
+from phase3.latentsymantics import LatentSymantics
 
 
 def insert_images_in_database(

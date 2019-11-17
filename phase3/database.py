@@ -1,7 +1,7 @@
 import traceback
 import pandas as pd
 
-from config import Config
+from phase3.config import Config
 from pymongo import MongoClient
 
 
@@ -59,9 +59,9 @@ class Database(object):
             collection = database[self.collection_name]
 
         if image_ids:
-            query_results = collection.find({"image_id": {"$in": image_ids}})
+            query_results = collection.find({"image_id": {"$in": image_ids}}).sort({"_id.getTimestamp()": 1})
         else:
-            query_results = collection.find({})
+            query_results = collection.find({}).sort({"_id.getTimestamp()": 1})
         connection.close()
 
         return list(query_results)

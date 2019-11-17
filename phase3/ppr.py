@@ -9,10 +9,11 @@ class PageRank(object):
         self.image_vectors = image_vectors
         self.node_count = len(image_vectors)
         self.graph = numpy.zeros(self.node_count)   # Transpose of Adjacency matrix
+        self.similarity_matrix = numpy.zeros(self.node_count)
         self.s = None   # Teleport vector
         self.c = 0.15   # (1 - alpha)
         self.matrix_inverse = None
-        self.steady_state_prob_vector = None    # PI
+        self.steady_state_prob_vector = None    # PI_steady_state
     
     def generate_graph(self):
         self.node_count = len(self.image_vectors)
@@ -21,14 +22,14 @@ class PageRank(object):
             for j in range(i+1, self.node_count):
                 # Compute Image similarity
                 similarity = 0
-                self.graph[i][j] = similarity
-                self.graph[j][j] = similarity
+                self.similarity_matrix[i][j] = similarity
+                self.similarity_matrix[j][j] = similarity
         
         #   Set top k edges from the image
         for i in range(self.node_count):
             p = PriorityQueue()
             for j in range(self.node_count):
-                p.put((-self.graph[i][j], j))
+                p.put((-self.similarity_matrix[i][j], j))
             self.graph[i] = numpy.zeros(self.node_count)  # Reset the row to 0
             for k in range(self.k):     # Get top k elements from the row
                 element = p.get()
