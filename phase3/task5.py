@@ -3,14 +3,14 @@ import numpy as np
 import visualizer
 
 from database import Database
-from imageprocessor import ImageProcessor
 from lsh import LSH
 
 
-def starter(image_id, m):
-    id_vector_pairs = Database().retrieve_many()
+def starter(image_id, m, k, l):
+    query_results = Database().retrieve_many()
+    id_vector_pairs = [(item["image_id"], item["vector"]) for item in query_results]
 
-    search_results = LSH(6, 6, id_vector_pairs).get_search_results(image_id)
+    search_results = LSH(l, k, id_vector_pairs).get_search_results(image_id, show=True)
 
     print(
         "Original dataset size: {} | Reduced search space size: {} | Reduction by {} %".format(
@@ -21,7 +21,10 @@ def starter(image_id, m):
             / len(id_vector_pairs),
         )
     )
-    search_id_vector_pairs = Database().retrieve_many(list(search_results))
+    query_results = Database().retrieve_many(list(search_results))
+    search_id_vector_pairs = [
+        (item["image_id"], item["vector"]) for item in query_results
+    ]
     source_vector = Database().retrieve_one(image_id)["vector"]
 
     similar_images = functions.find_similarity(source_vector, search_id_vector_pairs, m)
