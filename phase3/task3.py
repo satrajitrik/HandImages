@@ -1,12 +1,13 @@
 from database import Database
-from phase3.ppr import PageRank
+from ppr import PageRank
 
 
-def starter():
-    image_vectors = Database().retrieve_many()
+def starter(k, K, seed_images):
+    image_vectors = Database().retrieve_many(collection_type="training")
+    # print(image_vectors[0:2])
+    page_rank = PageRank(image_vectors[:6], 3)
+    print(page_rank.get_graph())
+    print(page_rank.perform_random_walk([1, 4]))
     
-    graph = PageRank(image_vectors)
-    
-
 if __name__ == '__main__':
     starter()

@@ -1,10 +1,15 @@
-from phase3 import task3, task4, task5
+import task3
+import task4
+import task5
 
 
 def main():
     task = int(input("Input Task number:"))
     if task == 3:
-        task3.starter()
+        k = int(input("Enter k (k outgoing edges): "))
+        K = int(input("Enter K (K most dominant images): "))
+        image_ids = input("Enter 3 image file names with spaces: ")
+        task3.starter(k, K, image_ids.replace('.jpg', '').split())
     elif task == 4:
         task4.starter()
     elif task == 5:
