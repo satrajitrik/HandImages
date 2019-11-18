@@ -1,6 +1,8 @@
 import traceback
 import pandas as pd
-
+import pymongo
+from bson.binary import Binary
+import pickle
 from config import Config
 from pymongo import MongoClient
 
@@ -59,9 +61,9 @@ class Database(object):
             collection = database[self.collection_name]
 
         if image_ids:
-            query_results = collection.find({"image_id": {"$in": image_ids}})
+            query_results = collection.find({"image_id": {"$in": image_ids}}).sort("_id.getTimestamp()", pymongo.ASCENDING)
         else:
-            query_results = collection.find({})
+            query_results = collection.find({}).sort("_id.getTimestamp()", pymongo.ASCENDING)
         connection.close()
 
         return list(query_results)
@@ -75,3 +77,21 @@ class Database(object):
         connection.close()
 
         return query_result
+    
+    def insert_binary(self, key, value, collection_type=None):
+        connection = self.open_connection()
+        database = connection[self.database_name]
+        if collection_type == "page_rank":
+            collection = database[Config().page_rank_collection_name()]
+            collection.insert_one({'graph_size': key, 'graph': Binary(pickle.dumps(value))})
+    
+    def retrieve_binary(self, key, collection_type=None):
+        connection = self.open_connection()
+        database = connection[self.database_name]
+        if collection_type == "page_rank":
+            collection = database[Config().page_rank_collection_name()]
+            """
+            Assumed that insertion and removal done only once for each node size
+            """
+            graph = pickle.loads(collection.find_one({'graph_size': key})['graph'])
+            return graph

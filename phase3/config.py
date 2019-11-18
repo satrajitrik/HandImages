@@ -3,7 +3,7 @@ import json
 
 class Config(object):
     def __init__(self):
-        self.__json_file_path = "constants.json"
+        self.__json_file_path = "/media/adv/Shared/PROJECTS/CSE515_MWDB/HandImages/constants.json"
         with open(self.__json_file_path) as f:
             self.constants = json.load(f)
 
@@ -18,17 +18,23 @@ class Config(object):
 
     def testing_collection_name(self):
         return self.constants.get("TESTING_COLLECTION_NAME")
+    
+    def page_rank_collection_name(self):
+        return self.constants.get("PAGE_RANK_COLLECTION_NAME")
 
     def mongo_url(self):
         return self.constants.get("MONGO_URL")
 
     def read_all_path(self):
         """
-        Reads 11K images
+            Reads all 11k images.
         """
         return self.constants.get("READ_ALL_PATH")
 
     def read_path(self):
+        """
+            
+        """
         return self.constants.get("READ_PATH")
 
     def read_training_set1_path(self):
