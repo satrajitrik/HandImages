@@ -83,15 +83,16 @@ class Database(object):
         database = connection[self.database_name]
         if collection_type == "page_rank":
             collection = database[Config().page_rank_collection_name()]
-            collection.insert_one({'graph_size': key, 'graph': Binary(pickle.dumps(value))})
+            collection.update_one(
+                {'graph_size': key},
+                {"$set": {'graph': Binary(pickle.dumps(value))}},
+                upsert=True
+            )
     
     def retrieve_binary(self, key, collection_type=None):
         connection = self.open_connection()
         database = connection[self.database_name]
         if collection_type == "page_rank":
             collection = database[Config().page_rank_collection_name()]
-            """
-            Assumed that insertion and removal done only once for each node size
-            """
             graph = pickle.loads(collection.find_one({'graph_size': key})['graph'])
             return graph
