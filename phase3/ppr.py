@@ -11,6 +11,7 @@ class PageRank(object):
         self.k = k
         self.image_vectors = image_vectors
         self.node_count = len(image_vectors)
+        print(self.node_count)
         self.graph = numpy.zeros((self.node_count, self.node_count))   # Transpose of Adjacency matrix
         self.similarity_matrix = numpy.zeros((self.node_count, self.node_count))
         self.s = None   # Teleport vector
@@ -22,6 +23,9 @@ class PageRank(object):
     def generate_graph(self):
         self.node_count = len(self.image_vectors)
         # Generate similarity graph
+        self.image_names = []
+        for i in range(self.node_count):
+            self.image_names.append(self.image_vectors[i]['image_id'])
         for i in range(self.node_count):
             for j in range(i+1, self.node_count):
                 # Compute Image similarity
@@ -63,16 +67,22 @@ class PageRank(object):
                                                                   (1-self.c) * self.graph))
         return self.matrix_inverse
 
-    def perform_random_walk(self, query_image_positions):
+    def perform_random_walk(self, query_images):
         """
-        :param query_image_position: Position of the query image in the graph (Restart position)
+        :param query_image_positions: Position of the query image in the graph (Restart position)
         :return:
         """
+        try:
+            query_image_positions = [self.image_names.index(x) for x in query_images]
+        except ValueError:
+            print("Query images: ", query_images)
+            print("Images available: ", self.image_names)
+            raise ValueError("Query image not available in the list")
         self.s = numpy.zeros(self.node_count)
         for position in query_image_positions:
             self.s[position] = 1.0 / len(query_image_positions)
         self.compute_matrix_inverse()
-        print(self.s)
+        # print(self.s)
         self.steady_state_prob_vector = numpy.matmul(self.matrix_inverse, self.c * self.s)
         p = PriorityQueue()
         for i in range(self.node_count):
