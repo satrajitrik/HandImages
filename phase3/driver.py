@@ -11,7 +11,8 @@ def main():
         image_ids = input("Enter 3 image file names with spaces: ")
         task3.starter(k, K, image_ids.replace('.jpg', '').split())
     elif task == 4:
-        task4.starter()
+        k = int(input("Select the Classifier :\n1. Decision Tree\t2. Support Vector Machine\t3. PPR : "))
+        task4.starter(k)
     elif task == 5:
         image_id = input("Enter the image ID: ")
         m = int(input("Enter m: "))
