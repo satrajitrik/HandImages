@@ -107,13 +107,13 @@ def insert_images_in_database(
 
 
 if __name__ == "__main__":
-    #insert_images_in_database(
-    #    feature_model=1, dimension_reduction=1, k=256, identifier=0
-    #)
+    insert_images_in_database(
+        feature_model=1, dimension_reduction=1, k=256, identifier=0
+    )
 
     # store training folder
     insert_images_in_database(
-        feature_model=1, dimension_reduction=1, k=10, identifier=1
+        feature_model=1, dimension_reduction=1, k=20, identifier=1
     )
 
     # store testing folder
