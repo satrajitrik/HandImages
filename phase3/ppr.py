@@ -29,11 +29,12 @@ class PageRank(object):
     
     def generate_graph(self):
         # Task 3
-        # self.node_count = len(self.image_vectors)
         # Generate similarity graph
         self.image_names = []
+        self.all_image_names = []
         for i in range(self.node_count):
             self.image_names.append(self.image_vectors[i]['image_id'])
+        self.all_image_names.extend(self.image_names)
         for i in range(self.node_count):
             for j in range(i+1, self.node_count):
                 # Compute Image similarity
@@ -112,7 +113,7 @@ class PageRank(object):
                 probability = -probability
                 if not probability:
                     break
-                print(probability, image, self.is_labelled[image])
+                # print(probability, image, self.is_labelled[image])
                 if self.is_labelled[image]:
                     if self.labels[image] == 1:    # Dorsal
                         dorsal_probability += probability
@@ -121,9 +122,9 @@ class PageRank(object):
             # print(self.labels.values())
             mean_dorsal_probability = dorsal_probability / list(self.labels.values()).count(1)
             mean_palmar_probability = palmar_probability / list(self.labels.values()).count(0)
-            print(palmar_probability, dorsal_probability,)
+            # print(palmar_probability, dorsal_probability,)
             self.new_labels[image_name] = "dorsal" if mean_dorsal_probability > mean_palmar_probability else "palmar"
-            print()
+            # print()
             # print(image_name, self.new_labels[image_name])
         return self.new_labels
         
