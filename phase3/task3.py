@@ -1,3 +1,4 @@
+import visualizer
 from database import Database
 from ppr import PageRank
 
@@ -13,7 +14,7 @@ def starter(k, K, seed_images):
         probability = -probability
         ranked_images.append((image_name, probability))
     print(ranked_images)
-    return ranked_images
+    visualizer.visualize_task3(ranked_images)
     
 
 if __name__ == '__main__':

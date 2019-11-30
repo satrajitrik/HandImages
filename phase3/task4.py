@@ -45,27 +45,33 @@ def starter(classifier):
         print("Incorrectly classified : ", (m - correct))
         print("accuracy : ", (correct * 1.0) / (m * 1.0))
     
-        visualizer.visualize_task4(images, y)
+        visualizer.visualize_task4(images, y, "Decision Tree")
 
     elif classifier == 3:
         # PPR
         training_image_vectors = Database().retrieve_many(image_ids=None, collection_type="training")
         testing_image_vectors = Database().retrieve_many(image_ids=None, collection_type="testing")
 
-        page_rank = PageRank(k=340, labelled_images=training_image_vectors, unlabelled_images=testing_image_vectors)
+        page_rank = PageRank(k=300, labelled_images=training_image_vectors, unlabelled_images=testing_image_vectors)
         result = page_rank.label_images()
         print(result)
         metadata = pandas.read_csv(Config().metadata_file())
         # print(metadata['imageName'][0], metadata['aspectOfHand'][0])
         # print(metadata['imageName'].index('Hand_0000942'))
-        print("dorsal" in str(metadata[metadata['imageName'] == 'Hand_0000942.jpg']['aspectOfHand']))
+        # print("dorsal" in str(metadata[metadata['imageName'] == 'Hand_0000942.jpg']['aspectOfHand']))
         correct, incorrect = 0, 0
+        imagename_list, aspect_list = [], []
         for imagename, aspect in result.items():
-            if aspect in str(metadata[metadata['imageName'] == 'Hand_0000942.jpg']['aspectOfHand']):
+            imagename_list.append(imagename)
+            aspect_list.append(aspect)
+            if aspect in str(metadata[metadata['imageName'] == imagename+'.jpg']['aspectOfHand']):
                 correct += 1
             else:
                 incorrect += 1
-        print(correct, incorrect, float(correct)/(incorrect+correct))
+        print("Correct prediction = ", correct)
+        print("Incorrect prediction = ", incorrect)
+        print("Prediction accuracy = ", float(correct)/(incorrect+correct))
+        # visualizer.visualize_task4(imagename_list, aspect_list, "PPR")
         
 if __name__ == '__main__':
     starter(classifier=3)
