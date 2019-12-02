@@ -15,7 +15,7 @@ def starter(k, K, seed_images):
         ranked_images.append((image_name, probability))
     print(ranked_images)
     visualizer.visualize_task3(ranked_images)
-    
 
-if __name__ == '__main__':
-    starter(k=4, K=15, seed_images=['Hand_0000002', 'Hand_0006340', 'Hand_0006336'])
+
+if __name__ == "__main__":
+    starter(k=4, K=15, seed_images=["Hand_0000002", "Hand_0006340", "Hand_0006336"])
