@@ -57,8 +57,7 @@ def visualize_task3(images_probability_pair):
     ax = axes.ravel()
     for i, (image, probability) in enumerate(images_probability_pair):
         ax[i].imshow(
-            plt.imread(Config().read_all_path() + image + ".jpg"),
-            interpolation="none",
+            plt.imread(Config().read_all_path() + image + ".jpg"), interpolation="none"
         )
         ax[i].set_title(probability, fontsize=8)
         ax[i].xaxis.set_visible(False)

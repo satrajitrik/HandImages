@@ -52,18 +52,31 @@ class Database(object):
         """
         connection = self.open_connection()
         database = connection[self.database_name]
+        all = 0
 
         if collection_type == "training":
             collection = database[Config().training_collection_name()]
         elif collection_type == "testing":
             collection = database[Config().testing_collection_name()]
         else:
+            all = 1
             collection = database[self.collection_name]
 
         if image_ids:
-            query_results = collection.find({"image_id": {"$in": image_ids}}).sort("_id.getTimestamp()", pymongo.ASCENDING)
+            if all == 0:
+                query_results = collection.find({"image_id": {"$in": image_ids}}).sort(
+                    "_id.getTimestamp()", pymongo.ASCENDING
+                )
+            else:
+                query_results = collection.find({"image_id": {"$in": image_ids}})
         else:
-            query_results = collection.find({}).sort("_id.getTimestamp()", pymongo.ASCENDING)
+            if all == 0:
+                query_results = collection.find({}).sort(
+                    "_id.getTimestamp()", pymongo.ASCENDING
+                )
+            else:
+                query_results = collection.find({})
+
         connection.close()
 
         return list(query_results)
@@ -77,22 +90,55 @@ class Database(object):
         connection.close()
 
         return query_result
-    
+
     def insert_binary(self, key, value, collection_type=None):
         connection = self.open_connection()
         database = connection[self.database_name]
         if collection_type == "page_rank":
             collection = database[Config().page_rank_collection_name()]
             collection.update_one(
-                {'graph_size': key},
-                {"$set": {'graph': Binary(pickle.dumps(value))}},
-                upsert=True
+                {"graph_size": key},
+                {"$set": {"graph": Binary(pickle.dumps(value))}},
+                upsert=True,
             )
-    
+
     def retrieve_binary(self, key, collection_type=None):
         connection = self.open_connection()
         database = connection[self.database_name]
         if collection_type == "page_rank":
             collection = database[Config().page_rank_collection_name()]
-            graph = pickle.loads(collection.find_one({'graph_size': key})['graph'])
+            graph = pickle.loads(collection.find_one({"graph_size": key})["graph"])
             return graph
+
+    def store_feedback(self, image_id, feedback):
+        connection = self.open_connection()
+        database = connection[self.database_name]
+        collection = database[Config().feedback_collection_name()]
+
+        relevant_list = [id for id, response in feedback if response == "y"]
+        irrelevant_list = [id for id, response in feedback if response == "n"]
+        print(relevant_list, irrelevant_list)
+
+        collection.update(
+            {"image_id": image_id},
+            {
+                "$push": {
+                    "relevant": {"$each": relevant_list},
+                    "irrelevant": {"$each": irrelevant_list},
+                }
+            },
+            upsert=True,
+        )
+        connection.close()
+
+        print("Successfully inserted into DB... ")
+
+    def retrieve_feedback(self, image_id):
+        connection = self.open_connection()
+        database = connection[self.database_name]
+        collection = database[Config().feedback_collection_name()]
+
+        query_result = collection.find_one({"image_id": image_id})
+        connection.close()
+
+        return query_result["relevant"], query_result["irrelevant"]
