@@ -117,7 +117,6 @@ class Database(object):
 
         relevant_list = [id for id, response in feedback if response == "y"]
         irrelevant_list = [id for id, response in feedback if response == "n"]
-        print(relevant_list, irrelevant_list)
 
         collection.update(
             {"image_id": image_id},

@@ -16,12 +16,16 @@ def probablistic_feedback(image_id, all_images):
     relevant_images = []
     relevant_list, irrelevant_list = Database().retrieve_feedback(image_id)
 
-    for id, value in all_images:
+    for id, _ in all_images:
+        """
+        Comparing the priors based on Naive Bayes formula. P(B|A) = P(A|B).P(B) / P(A)
+        We only need to calculate P(A|B) for comparison
+        """
         relevance_prior = relevant_list.count(id) / len(relevant_list)
         irrelevance_prior = irrelevant_list.count(id) / len(irrelevant_list)
 
         if relevance_prior >= irrelevance_prior:
-            relevant_images.append((id, value))
+            relevant_images.append((id, relevance_prior))
 
     return relevant_images
 
@@ -37,15 +41,14 @@ def feedback_loop(image_id, similar_images, all_images, m, algorithm):
     while 1:
         Database().store_feedback(image_id, feedback)
 
-        relevant_images = probablistic_feedback(image_id, all_images)
-
-        source_vector = Database().retrieve_one(image_id)["vector"]
-        similar_images = functions.find_similarity(source_vector, relevant_images)[:m]
-
+        similar_images = sorted(
+            probablistic_feedback(image_id, all_images),
+            key=lambda x: x[1],
+            reverse=True,
+        )[:m]
         visualizer.visualize_lsh(image_id, similar_images)
 
         response = input("Satisfied with search results? y/n ")
-
         if response == "y":
             break
 
