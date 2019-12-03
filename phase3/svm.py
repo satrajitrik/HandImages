@@ -74,7 +74,7 @@ class Base_binary_classification(object):
             kernel_support_vectors = self._compute_kernel_support_vectors(X)
         prod = np.multiply(kernel_support_vectors, self.dual_coef_)
         prediction = self.intercept_ + np.sum(prod, 1)  # , keepdims=True)
-        print(prediction)
+        #print(prediction)
         return prediction
 
     def predict_proba(self, X):
