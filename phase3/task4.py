@@ -61,32 +61,34 @@ def starter(classifier):
         testing_image_vectors = Database().retrieve_many(
             image_ids=None, collection_type="testing"
         )
-
-        page_rank = PageRank(
-            k=300,
+        accuracy_list = []
+        k_list = []
+        for i in range(3, 180):
+            page_rank = PageRank(
+            k=i,
             labelled_images=training_image_vectors,
             unlabelled_images=testing_image_vectors,
-        )
-        result = page_rank.label_images()
-        print(result)
-        metadata = pandas.read_csv(Config().metadata_file())
-        # print(metadata['imageName'][0], metadata['aspectOfHand'][0])
-        # print(metadata['imageName'].index('Hand_0000942'))
-        # print("dorsal" in str(metadata[metadata['imageName'] == 'Hand_0000942.jpg']['aspectOfHand']))
-        correct, incorrect = 0, 0
-        imagename_list, aspect_list = [], []
-        for imagename, aspect in result.items():
-            imagename_list.append(imagename)
-            aspect_list.append(aspect)
-            if aspect in str(
-                metadata[metadata["imageName"] == imagename + ".jpg"]["aspectOfHand"]
-            ):
-                correct += 1
-            else:
-                incorrect += 1
-        print("Correct prediction = ", correct)
-        print("Incorrect prediction = ", incorrect)
-        print("Prediction accuracy = ", float(correct) / (incorrect + correct))
+            )
+            result = page_rank.label_images()
+            metadata = pandas.read_csv(Config().metadata_file())
+            correct, incorrect = 0, 0
+            imagename_list, aspect_list = [], []
+            for imagename, aspect in result.items():
+                imagename_list.append(imagename)
+                aspect_list.append(aspect)
+                if aspect in str(
+                    metadata[metadata["imageName"] == imagename + ".jpg"]["aspectOfHand"]
+                ):
+                    correct += 1
+                else:
+                    incorrect += 1
+            # print("Correct prediction = ", correct)
+            # print("Incorrect prediction = ", incorrect)
+            # print("Prediction accuracy = ", float(correct) / (incorrect + correct))
+            k_list.append(i)
+            accuracy_list.append(float(correct) / (incorrect + correct))
+        print(k_list)
+        print(accuracy_list)
         # visualizer.visualize_task4(imagename_list, aspect_list, "PPR")
 
 

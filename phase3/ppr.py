@@ -22,6 +22,8 @@ class PageRank(object):
         if unlabelled_images:
             self.all_image_vectors.extend(self.unlabelled_image_vectors)
             self.node_count += len(self.unlabelled_image_vectors)
+        if self.k > self.node_count:
+            raise ValueError("k is greater than number of nodes")
         print(self.node_count)
 
         self.graph = numpy.zeros(
