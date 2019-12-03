@@ -165,22 +165,27 @@ class PageRank(object):
             )
         return self.matrix_inverse
 
-    def perform_random_walk(self, query_images, label=False):
+    def perform_random_walk(self, query_images=None):
         """
         :param query_images: Position of the query image in the graph (Restart position)
         :return:
         """
-        try:
-            query_image_positions = [
-                self.all_image_names.index(x) for x in query_images
-            ]
-        except ValueError:
-            print("Query images: ", query_images)
-            print("Images available: ", self.all_image_names)
-            raise ValueError("Query image not available in the list")
-        self.s = numpy.zeros(self.node_count)
-        for position in query_image_positions:
-            self.s[position] = 1.0 / len(query_image_positions)
+        if query_images:
+            # Set teleport matrix using query image
+            try:
+                query_image_positions = [
+                    self.all_image_names.index(x) for x in query_images
+                ]
+            except ValueError:
+                print("Query images: ", query_images)
+                print("Images available: ", self.all_image_names)
+                raise ValueError("Query image not available in the list")
+            self.s = numpy.zeros(self.node_count)
+            for position in query_image_positions:
+                self.s[position] = 1.0 / len(query_image_positions)
+        else:
+            # Set teleport matrix from outside
+            pass
         self.compute_matrix_inverse()
         # print(self.s)
         self.steady_state_prob_vector = numpy.matmul(
