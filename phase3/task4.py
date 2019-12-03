@@ -1,17 +1,63 @@
 import numpy as np
 import pandas
 import visualizer
-
 from config import Config
 from database import Database
 from decisiontreeclassifier import DecisionTreeClassifier as dt
+import svm
+from kernel import Kernel
 from ppr import PageRank
 
 
 def starter(classifier):
     if classifier == 1:
-        # SVM
-        pass
+
+        query_results = Database().retrieve_many(
+        image_ids=None, collection_type="training"
+        )
+        training_data = np.array([item["vector"] for item in query_results])
+        labels = np.array([item["label"] for item in query_results])
+
+        classifer = svm.binary_classification_qp(kernel=Kernel._polykernel(5)) # try 5 and 10 for dimensions in polykernel
+        labels = np.where(labels <= 0, -1, 1)
+
+        classifer.fit(training_data, labels)
+
+        query_results = Database().retrieve_many(
+        image_ids=None, collection_type="testing"
+        )
+        testing_data = np.array([item["vector"] for item in query_results])
+        y = classifer.predict(testing_data)
+        m = len(y)
+        images = [item["image_id"] for item in query_results]
+        metadata = pandas.read_csv(Config().metadata_file())
+        oy = []
+        correct = 0
+        for i in range(len(images)):
+            image_id = images[i] + ".jpg"
+            temp = "".join(metadata[metadata.imageName == image_id]["aspectOfHand"].values)
+            oy.append(1 if "dorsal" in temp else -1)
+            if oy[i] == y[i]:
+                correct += 1
+        print(images)
+        print(oy)
+        print("correctly classified : ", correct)
+        print("Incorrectly classified : ", (m - correct))
+        print("accuracy : ", (correct * 1.0) / (m * 1.0))
+
+        k_th_eigenvector_all = []
+        for i in range(len(images)):
+            arr=[]
+            if(y[i]==1):
+                val='dorsal'
+            else:
+                val='palmer'
+            arr.append((images[i] + ".jpg",val))
+            k_th_eigenvector_all.append(arr)
+        print(k_th_eigenvector_all)
+        k_th_eigenvector_all = pandas.DataFrame(k_th_eigenvector_all)
+        visualizer.visualize_svm_classifier(k_th_eigenvector_all , 'SVM')
+
     elif classifier == 2:
         # retrive Training data from Database
         query_results = Database().retrieve_many(
@@ -27,7 +73,6 @@ def starter(classifier):
             image_ids=None, collection_type="testing"
         )
         testing_data = np.array([item["vector"] for item in query_results])
-
         y = classifer.predict(testing_data)
         print(y)
 
@@ -93,4 +138,5 @@ def starter(classifier):
 
 
 if __name__ == "__main__":
-    starter(classifier=3)
+    starter(classifier=1)
+
