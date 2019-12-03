@@ -3,7 +3,7 @@ import json
 
 class Config(object):
     def __init__(self):
-        self.__json_file_path = "../constants.json"
+        self.__json_file_path = "constants.json"
         with open(self.__json_file_path) as f:
             self.constants = json.load(f)
 
