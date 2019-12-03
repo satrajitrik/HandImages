@@ -59,13 +59,13 @@ def visualize_task3(images_probability_pair):
         ax[i].imshow(
             plt.imread(Config().read_all_path() + image + ".jpg"), interpolation="none"
         )
-        ax[i].set_title(probability, fontsize=8)
+        ax[i].set_title(image + " : " + str(probability), fontsize=7)
         ax[i].xaxis.set_visible(False)
         ax[i].yaxis.set_visible(False)
 
-    # for i in range(m, row * col):
-    #     ax[i].xaxis.set_visible(False)
-    #     ax[i].yaxis.set_visible(False)
+    for i in range(m, row * col):
+        ax[i].xaxis.set_visible(False)
+        ax[i].yaxis.set_visible(False)
 
     fig.suptitle("Ranked Images")
     plt.subplots_adjust(hspace=0.5)
