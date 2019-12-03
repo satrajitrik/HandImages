@@ -53,9 +53,9 @@ def visualize_lsh(source_image_id, similar_images):
     plt.show()
 
 
-def visualize_task4(images, y):
+def visualize_task4(images, y, classifier):
     m = len(y)
-    col = 6
+    col = 4
     row = int(m / col) if m % col == 0 else int(m / col) + 1
     fig, axes = plt.subplots(row, col)
     ax = axes.ravel()
@@ -64,8 +64,9 @@ def visualize_task4(images, y):
             plt.imread(Config().read_all_path() + images[i] + ".jpg"),
             interpolation="none",
         )
-        l = "Dorsal" if y[i] == 1 else "Palmar"
-        ax[i].set_title(l, fontsize=10)
+        # print(y[i],)
+        l = "Dorsal" if (y[i] == 1 or y[i] == "dorsal") else "Palmar"
+        ax[i].set_title(l, fontsize=8)
         ax[i].xaxis.set_visible(False)
         ax[i].yaxis.set_visible(False)
 
@@ -73,7 +74,30 @@ def visualize_task4(images, y):
         ax[i].xaxis.set_visible(False)
         ax[i].yaxis.set_visible(False)
 
-    fig.suptitle("Image Classification using Decision Tree")
+    fig.suptitle("Image Classification using " + classifier)
+    plt.show()
+
+
+def visualize_task3(images_probability_pair):
+    m = len(images_probability_pair)
+    col = 3
+    row = int(m / col) if m % col == 0 else int(m / col) + 1
+    fig, axes = plt.subplots(row, col)
+    ax = axes.ravel()
+    for i, (image, probability) in enumerate(images_probability_pair):
+        ax[i].imshow(
+            plt.imread(Config().read_all_path() + image + ".jpg"), interpolation="none"
+        )
+        ax[i].set_title(probability, fontsize=8)
+        ax[i].xaxis.set_visible(False)
+        ax[i].yaxis.set_visible(False)
+
+    # for i in range(m, row * col):
+    #     ax[i].xaxis.set_visible(False)
+    #     ax[i].yaxis.set_visible(False)
+
+    fig.suptitle("Ranked Images")
+    plt.subplots_adjust(hspace=0.5)
     plt.show()
 
 

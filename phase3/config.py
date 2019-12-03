@@ -13,12 +13,15 @@ class Config(object):
     def collection_name(self):
         return self.constants.get("COLLECTION_NAME")
 
+    def feedback_collection_name(self):
+        return self.constants.get("FEEDBACK_COLLECTION_NAME")
+
     def training_collection_name(self):
         return self.constants.get("TRAINING_COLLECTION_NAME")
 
     def testing_collection_name(self):
         return self.constants.get("TESTING_COLLECTION_NAME")
-    
+
     def page_rank_collection_name(self):
         return self.constants.get("PAGE_RANK_COLLECTION_NAME")
 
@@ -27,13 +30,13 @@ class Config(object):
 
     def read_all_path(self):
         """
-            Reads all 11k images.
+        Reads all 11k images.
         """
         return self.constants.get("READ_ALL_PATH")
 
     def read_path(self):
         """
-            
+        
         """
         return self.constants.get("READ_PATH")
 
