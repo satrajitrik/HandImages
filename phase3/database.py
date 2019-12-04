@@ -32,7 +32,7 @@ class Database(object):
         else:
             return 1
 
-    def insert_many(self, records, collection_type='sample_test'):
+    def insert_many(self, records, collection_type=None):
         """
         :param records: List of records to insert
         :param collection_type (Optional): training - insert into hands_train, testing - insert into hands_test, null - insert into hands
@@ -56,7 +56,7 @@ class Database(object):
 
         print("Successfully inserted into DB... ")
 
-    def retrieve_many(self, image_ids= None, collection_type="sample_test"):
+    def retrieve_many(self, image_ids= None, collection_type=None):
         """
         :param image_ids (Optional): List of image IDs as a filter while querying
         :param collection_type (Optional): training - query from hands_train, testing - query from hands_test, null - query from hands
