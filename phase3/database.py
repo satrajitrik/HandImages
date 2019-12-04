@@ -13,6 +13,16 @@ class Database(object):
         self.collection_name = Config().collection_name()
         self.mongo_url = Config().mongo_url()
 
+    def find_label_from_metadata(self, image_id):
+        connection = self.open_connection()
+        database = connection[self.database_name]
+        collection = database[Config().metadata_collection_name()]
+        query_Results = collection.find_one({"image_id": image_id})
+        if query_Results['dorsal'] == 0:
+            return 0
+        else:
+            return 1
+        
     def open_connection(self):
         try:
             connection = MongoClient(self.mongo_url)
@@ -35,6 +45,8 @@ class Database(object):
             collection = database[Config().training_collection_name()]
         elif collection_type == "testing":
             collection = database[Config().testing_collection_name()]
+        elif collection_type == "sample_test":
+            collection = database[Config().sample_test_name()]   
         else:
             collection = database[self.collection_name]
 
@@ -43,6 +55,20 @@ class Database(object):
         connection.close()
 
         print("Successfully inserted into DB... ")
+        
+     def retrieve_many_t1(self, task, label=None, value=None):
+        connection = self.open_connection()
+        database = connection[self.database_name]
+        collection = database[Config().sample_test_name()]
+
+        if label:
+            query_results = collection.find({"$and": [{"task": task}, {label: value}]})
+        else:
+            query_results = collection.find({"task": task})
+        connection.close()
+
+        return [item for item in query_results]
+
 
     def retrieve_many(self, image_ids=None, collection_type=None):
         """
@@ -58,6 +84,8 @@ class Database(object):
             collection = database[Config().training_collection_name()]
         elif collection_type == "testing":
             collection = database[Config().testing_collection_name()]
+        elif collection_type == "sample_test":
+            collection = database[Config().sample_test_name()]
         else:
             all = 1
             collection = database[self.collection_name]
@@ -80,6 +108,18 @@ class Database(object):
         connection.close()
 
         return list(query_results)
+    
+     def retrieve_one_t1(self,task, image_id,):
+        connection = self.open_connection()
+        database = connection[self.database_name]
+        collection = database[Config().sample_test_name()]
+
+        query_results = collection.find_one(
+            {"$and": [{"image_id": image_id}, {"task": task}]}
+        )
+        connection.close()
+
+        return query_results
 
     def retrieve_one(self, image_id):
         connection = self.open_connection()
@@ -90,7 +130,19 @@ class Database(object):
         connection.close()
 
         return query_result
+    
+    def retrieve_metadata_with_labels(self, label=None, value=None):
+        connection = self.open_connection()
+        database = connection[self.database_name]
+        collection = database[Config().metadata_collection_name()]
 
+        if label:
+            query_results = collection.find({label: value})
+        else:
+            query_results = collection.find()
+        connection.close()
+
+        return query_results
     def insert_binary(self, key, value, collection_type=None):
         connection = self.open_connection()
         database = connection[self.database_name]
