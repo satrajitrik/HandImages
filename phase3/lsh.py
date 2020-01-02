@@ -69,7 +69,7 @@ class LSH(object):
 
         if show:
             self.__beautify_and_print(hash_tables)
-
+        print(hash_tables)
         search_results = set.union(
             *[
                 hash_table[hash]

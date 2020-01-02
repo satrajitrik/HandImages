@@ -30,8 +30,8 @@ def starter(image_id, m, k, l):
     all_images = functions.find_similarity(source_vector, search_id_vector_pairs)
     similar_images = all_images[:m]
 
-    print(similar_images)
+    # print(similar_images)
 
-    visualizer.visualize_lsh(image_id, similar_images)
+    #visualizer.visualize_lsh(image_id, similar_images)
 
     return similar_images, all_images

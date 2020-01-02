@@ -24,7 +24,7 @@ def main():
         m = int(input("Enter m: "))
         k = int(input("Enter k: "))
         l = int(input("Enter l: "))
-        algorithm = input("Enter feedback system: 1. SVM\t2. Decision Tree\t3. PPR\t4. Probabilistic Relevance\t")
+        algorithm = int(input("Enter feedback system: 1. SVM\t2. Decision Tree\t3. PPR\t4. Probabilistic Relevance\t"))
         task6.starter(image_id, m, k, l, algorithm)
 
 

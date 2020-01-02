@@ -96,7 +96,19 @@ def starter(classifier):
         print("Incorrectly classified : ", (m - correct))
         print("accuracy : ", (correct * 1.0) / (m * 1.0))
 
-        visualizer.visualize_task4(images, y, "Decision Tree")
+        k_th_eigenvector_all = []
+        for i in range(len(images)):
+            arr = []
+            if (y[i] == 1):
+                val = 'dorsal'
+            else:
+                val = 'palmer'
+            arr.append((images[i] + ".jpg", val))
+            k_th_eigenvector_all.append(arr)
+        print(k_th_eigenvector_all)
+        k_th_eigenvector_all = pandas.DataFrame(k_th_eigenvector_all)
+        visualizer.visualize_svm_classifier(k_th_eigenvector_all, 'Decision Tree')
+        #visualizer.visualize_task4(images, y, "Decision Tree")
 
     elif classifier == 3:
         # PPR

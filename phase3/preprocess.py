@@ -113,10 +113,10 @@ if __name__ == "__main__":
 
     # store training folder
     insert_images_in_database(
-        feature_model=1, dimension_reduction=1, k=256, identifier=1,set2_dir=False
+        feature_model=1, dimension_reduction=1, k=100, identifier=1,set2_dir=False
     )
 
     # store testing folder
     insert_images_in_database(
-        feature_model=1, dimension_reduction=1, k=256, identifier=2,set2_dir=False
+        feature_model=1, dimension_reduction=1, k=100, identifier=2,set2_dir=False
     )

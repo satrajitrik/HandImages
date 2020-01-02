@@ -8,28 +8,30 @@ from PIL import Image
 from PIL import ImageTk
 from config import Config
 
-img_dir = Config().read_testing_set1_path()
+img_dir = Config().read_testing_set2_path()
+img_dir1 = Config().read_all_path()
 thumbnail_size = (160, 120)
 symatics_width = 1600
 data_symantics_height = 800
 
 
 def var_status():
-
-    lr = []
-    lr1 = []
+    global response
+    response = []
+    records = []
     for box in tc.CheckBox.boxes:
         if box.text == 'Relevant' and box.var.get():  # Checks if the button is ticked
-            lr.append(box.var.get())
+            records.append((box.var.get(), 'y'))
+            box.var.set("")
         if box.text == 'Irrelevant' and box.var.get():  # Checks if the button is ticked
-            lr1.append(box.var.get())
-    print(lr)
-    print(lr1)
-    records = {
-        "Relevant": lr,
-        "Irrelevant": lr1
+            records.append((box.var.get(), 'n'))
+            box.var.set("")
 
-    }
+    response = records
+
+
+def stored_values():
+    return response
 
 
 def visualize_lsh(source_image_id, similar_images):
@@ -102,13 +104,20 @@ def visualize_task3(images_probability_pair):
 
 
 def create_thumbnail(img_id):
-    # Load an image using OpenCV
     img_path = os.path.join(img_dir, img_id)
-    # print('Loading image at path: %s' % img_path)
+    #print('Loading image at path: %s' % img_path)
     cv_img = cv2.cvtColor(cv2.imread(img_path), cv2.COLOR_BGR2RGB)
     tn_img = cv2.resize(cv_img, thumbnail_size, interpolation=cv2.INTER_AREA)
     return tn_img
 
+def create_thumbnail_11k(img_id):
+    # Load an image using OpenCV
+    img_id= img_id+".jpg"
+    img_path = os.path.join(img_dir1, img_id)
+    #print('Loading image at path: %s' % img_path)
+    cv_img = cv2.cvtColor(cv2.imread(img_path), cv2.COLOR_BGR2RGB)
+    tn_img = cv2.resize(cv_img, thumbnail_size, interpolation=cv2.INTER_AREA)
+    return tn_img
 
 def visualize_svm_classifier(images_labeled, classifier_type):
     i = 0
@@ -150,6 +159,7 @@ def visualize_svm_classifier(images_labeled, classifier_type):
             photo = ImageTk.PhotoImage(image=Image.fromarray(tn_img))
             photos.append(photo)
             canvas.create_image(0, 0, image=photos[p_count], anchor=tk.NW)
+            p_count+=1
 
             match_label = tk.Label(frame.scrollable_frame, text=img)
             match_label.grid(row=v_row, column=img_col, columnspan=2)
@@ -160,12 +170,6 @@ def visualize_svm_classifier(images_labeled, classifier_type):
             canvas.grid(row=v_row, column=img_col)
             label.grid(row=v_row, column=lbl_col)
             v_row += 1
-            checkbox1 = tc.CheckBox(row, text='Relevant', fg='green',onvalue=ldv1[p_count], offvalue=None)
-            checkbox2 = tc.CheckBox(row, text='Irrelevant',fg='red' ,onvalue=ldv1[p_count], offvalue=None)
-            p_count += 1
-            checkbox1.grid(row=v_row, column=lbl_col)
-            checkbox2.grid(row=v_row, column=lbl_col+1)
-
             v_row += 1
             count += 3
 
@@ -175,10 +179,75 @@ def visualize_svm_classifier(images_labeled, classifier_type):
         # img_col += 2
         # lbl_col += 2
 
-    quit_button = tk.Button(window, text="Quit", command=window.quit ,width='15', fg="red")
+    frame.pack(side="left", fill="both")
+    window.mainloop()
+
+
+def visualize_feedback(images_labeled, classifier_type):
+    i = 0
+    ldv1 = []
+    for ls_list in images_labeled:
+        ldv1.append(ls_list)
+    photos = []
+    # Created a window
+    window = tk.Toplevel()
+
+    title_txt = (
+            " %s - based Feedback "
+            % classifier_type
+    )
+    window.title(title_txt)
+    frame = VSF(window, symatics_width, data_symantics_height)
+
+    v_row = 0
+    img_col = 0
+    lbl_col = 1
+    ls_count = 1
+    p_count = 0
+    count=0
+    for img in images_labeled:
+        v_row += 1
+        if(count%8) == 0:
+            v_row = 1
+            img_col += 2
+
+        row = tk.Frame(frame.scrollable_frame, relief=tk.RIDGE, borderwidth=2)
+        tn_img = create_thumbnail_11k(img)
+        height, width, no_channels = tn_img.shape
+        # Create a canvas that can fit the above image
+        canvas = tk.Canvas(row, width=width, height=height)
+        # Use PIL (Pillow) to convert the NumPy nd array to a PhotoImage
+        photo = ImageTk.PhotoImage(image=Image.fromarray(tn_img))
+        photos.append(photo)
+        canvas.create_image(0, 0, image=photos[p_count], anchor=tk.NW)
+
+        match_label = tk.Label(frame.scrollable_frame, text=img)
+        match_label.grid(row=v_row, column=img_col, columnspan=2)
+        v_row += 1
+
+        row.grid(row=v_row, column=img_col, columnspan=2)
+        canvas.grid(row=v_row, column=img_col)
+        var=tk.StringVar()
+        checkbox1 = tc.CheckBox(row, text='Relevant', fg='green', onvalue=ldv1[p_count], offvalue=None)
+        checkbox2 = tc.CheckBox(row, text='Irrelevant', fg='red', onvalue=ldv1[p_count], offvalue=None)
+        p_count += 1
+        checkbox1.grid(row=v_row, column=lbl_col)
+        checkbox2.grid(row=v_row, column=lbl_col+1)
+
+        v_row += 1
+        count += 2
+
+
+        #v_row = 0
+        # ls_count += 1
+        # img_col += 2
+        # lbl_col += 2
+
+    quit_button = tk.Button(window, text="Quit", command=window.quit, width='15', fg="red")
     quit_button.pack(side=tk.BOTTOM)
     save_button = tk.Button(window, text="Save", command=var_status, width='15', fg="blue")
     save_button.pack(side=tk.BOTTOM)
     frame.pack(side="left", fill="both")
     window.mainloop()
+    #return
 

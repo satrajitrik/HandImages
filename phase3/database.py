@@ -22,6 +22,16 @@ class Database(object):
             print("Connection refused... ")
         return None
 
+    def find_label_from_metadata(self, image_id):
+        connection = self.open_connection()
+        database = connection[self.database_name]
+        collection = database[Config().metadata_collection_name()]
+        query_Results = collection.find_one({"image_id": image_id})
+        if query_Results['dorsal'] == 0:
+            return 0
+        else:
+            return 1
+
     def insert_many(self, records, collection_type=None):
         """
         :param records: List of records to insert
@@ -53,6 +63,7 @@ class Database(object):
         connection = self.open_connection()
         database = connection[self.database_name]
         all = 0
+        print(self.collection_name)
 
         if collection_type == "training":
             collection = database[Config().training_collection_name()]
@@ -110,7 +121,42 @@ class Database(object):
             graph = pickle.loads(collection.find_one({"graph_size": key})["graph"])
             return graph
 
+    def delete_prev_feedback(self, image_id):
+        connection = self.open_connection()
+        database = connection[self.database_name]
+        collection = database[Config().feedback_collection_name()]
+        collection.remove({"image_id": image_id})
+        connection.close()
+
+        print("deleted previous feedback")
+
+    def retrieve_many_t1(self, task, label=None, value=None):
+        connection = self.open_connection()
+        database = connection[self.database_name]
+        collection = database[Config().sample_test_name()]
+
+        if label:
+            query_results = collection.find({"$and": [{"task": task}, {label: value}]})
+        else:
+            query_results = collection.find({"task": task})
+        connection.close()
+
+        return [item for item in query_results]
+
+    def retrieve_one_t1(self, task, image_id, ):
+        connection = self.open_connection()
+        database = connection[self.database_name]
+        collection = database[Config().sample_test_name()]
+
+        query_results = collection.find_one(
+            {"$and": [{"image_id": image_id}, {"task": task}]}
+        )
+        connection.close()
+
+        return query_results
+
     def store_feedback(self, image_id, feedback):
+        print(feedback)
         connection = self.open_connection()
         database = connection[self.database_name]
         collection = database[Config().feedback_collection_name()]
@@ -131,6 +177,7 @@ class Database(object):
         connection.close()
 
         print("Successfully inserted into DB... ")
+
 
     def retrieve_feedback(self, image_id):
         connection = self.open_connection()
